@@ -80,7 +80,13 @@ export default function ServiceItemsPage() {
     if (!editingItem) return
     
     try {
-      await updateItem.mutateAsync({ id: editingItem.id, data })
+      await updateItem.mutateAsync({ 
+        id: editingItem.id, 
+        data: {
+          ...data,
+          description: data.description || undefined
+        }
+      })
       setEditingItem(null)
     } catch (error) {
       console.error('Error updating item:', error)
