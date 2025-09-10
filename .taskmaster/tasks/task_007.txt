@@ -1,0 +1,11 @@
+# Task ID: 7
+# Title: Multi-Step Booking Form with Guest Support
+# Status: pending
+# Dependencies: 6
+# Priority: high
+# Description: Implement the complete multi-step booking flow: service selection → details → schedule → address → review → payment.
+# Details:
+Create multi-step booking form with progress indicator, implement service selection with categories and extras, add scheduling interface with time slot selection, create address management (new/saved addresses), implement booking review and confirmation, and add guest booking support with draft persistence.
+
+# Test Strategy:
+Test complete booking flow, verify form validation, test guest vs authenticated user flows, and ensure data persistence works correctly.

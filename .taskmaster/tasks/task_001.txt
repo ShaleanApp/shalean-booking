@@ -1,0 +1,11 @@
+# Task ID: 1
+# Title: Project Setup and Configuration
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Set up the Next.js 15 project with TypeScript, TailwindCSS, shadcn/ui, and essential dependencies for Shalean Cleaning Services.
+# Details:
+Initialize the project with proper folder structure, install required dependencies (Supabase client, Paystack, Resend/Postmark, Playwright), configure TypeScript, set up basic routing structure, and configure GitHub Actions + Vercel for CI/CD.
+
+# Test Strategy:
+Verify that the development server runs without errors, TypeScript compilation works, TailwindCSS is properly configured, and all dependencies are installed correctly.

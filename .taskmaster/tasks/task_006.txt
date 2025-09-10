@@ -1,0 +1,11 @@
+# Task ID: 6
+# Title: Customer Landing Page with SEO Optimization
+# Status: pending
+# Dependencies: 5
+# Priority: high
+# Description: Create the main landing page for customers with SEO optimization, structured data, and service discovery.
+# Details:
+Build responsive landing page, implement SEO optimization (meta tags, structured data, sitemap, robots.txt), create service browsing interface, and add call-to-action elements for booking.
+
+# Test Strategy:
+Test page loading performance, verify SEO elements, check structured data validation, and ensure mobile responsiveness.

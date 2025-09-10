@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: Cleaner Dashboard and Job Management
+# Status: done
+# Dependencies: 9
+# Priority: medium
+# Description: Create cleaner dashboard for viewing assigned jobs and updating booking status.
+# Details:
+Build cleaner dashboard with assigned jobs list, job details (date, time, address, customer info), status update interface (On My Way → Arrived → Completed), earnings tracking, job history, and rating system integration.
+
+# Test Strategy:
+Test cleaner dashboard functionality, verify job assignment display, test status updates, and ensure proper cleaner-only access.

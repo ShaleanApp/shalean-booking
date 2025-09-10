@@ -1,0 +1,11 @@
+# Task ID: 8
+# Title: Paystack Payment Integration
+# Status: pending
+# Dependencies: 7
+# Priority: high
+# Description: Integrate Paystack inline checkout with webhook reconciliation for secure payment processing.
+# Details:
+Set up Paystack integration, implement inline checkout flow, create webhook handler for payment confirmations, add payment status tracking, implement idempotency keys for webhook retries, and add payment failure handling.
+
+# Test Strategy:
+Test payment processing with test cards, verify webhook handling, test payment failures and retries, and ensure payment reconciliation works correctly.

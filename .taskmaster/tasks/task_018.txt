@@ -1,0 +1,11 @@
+# Task ID: 18
+# Title: Monitoring and Analytics Setup
+# Status: pending
+# Dependencies: 17
+# Priority: low
+# Description: Implement comprehensive monitoring with Sentry, GA4/GTM, and custom analytics tracking.
+# Details:
+Set up Sentry for error tracking and performance monitoring, implement GA4/GTM for user analytics, create custom event tracking (start_booking, add_extra, payment_success), and add health check endpoints.
+
+# Test Strategy:
+Test error tracking, verify analytics data collection, test health checks, and ensure monitoring alerts work correctly.

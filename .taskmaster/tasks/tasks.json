@@ -1,0 +1,658 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Project Setup and Configuration",
+        "description": "Set up the Next.js 15 project with TypeScript, TailwindCSS, shadcn/ui, and essential dependencies for Shalean Cleaning Services.",
+        "details": "Initialize the project with proper folder structure, install required dependencies (Supabase client, Paystack, Resend/Postmark, Playwright), configure TypeScript, set up basic routing structure, and configure GitHub Actions + Vercel for CI/CD.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Verify that the development server runs without errors, TypeScript compilation works, TailwindCSS is properly configured, and all dependencies are installed correctly.",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Supabase Database Schema Implementation",
+        "description": "Create and implement the complete database schema for Shalean Cleaning Services with all 9 tables and relationships.",
+        "details": "Set up Supabase project, create tables: profiles, service_categories, service_items, extras, addresses, bookings, booking_items, cleaners, booking_assignments, payments, notifications. Implement Row Level Security (RLS) policies for all tables based on user roles (customer, cleaner, admin).",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "testStrategy": "Test database connections, verify all tables are created correctly, validate RLS policies work for different user roles, and test data relationships.",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Authentication System with Role-Based Access",
+        "description": "Implement Supabase Auth with role-based access control for customers, cleaners, and admins.",
+        "details": "Set up Supabase Auth, create login/register forms, implement role-based routing and middleware, create profile management system, and add protected route guards for different user types.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "2"
+        ],
+        "testStrategy": "Test user registration, login, logout, role-based access, and verify that protected routes work correctly for customers, cleaners, and admins.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Supabase Project and Integrate Client Libraries",
+            "description": "Initialize a new Supabase project, configure environment variables, and integrate the Supabase client libraries (supabase-js, @supabase/auth-helpers-nextjs) into the Next.js application for both client and server-side operations.",
+            "dependencies": [],
+            "details": "Set up a new Supabase project in the Supabase dashboard. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env.local`. Create `src/lib/supabase/client.ts` and `src/lib/supabase/server.ts` for Supabase client instances. Install `@supabase/supabase-js` and `@supabase/auth-helpers-nextjs`.\n<info added on 2025-09-09T20:21:31.446Z>\n### Implementation Plan for Login/Registration UI\n\nBased on the established Supabase client/server structure and the project's plan to use `shadcn/ui` (Task 4), the next steps are to create the user-facing authentication pages.\n\n1.  **Create Authentication Routes:**\n    *   Set up the necessary page files for login and registration. A good practice is to group them. Create the following files:\n        *   `src/app/login/page.tsx`\n        *   `src/app/register/page.tsx` (This can often be handled by the same component as login).\n\n2.  **Develop the Auth UI Component:**\n    *   Create a new client component, e.g., `src/components/auth/AuthForm.tsx`. This component will encapsulate the authentication logic.\n    *   Inside `AuthForm.tsx`, import the Supabase browser client: `import { createClient } from '@/lib/supabase/client';`.\n    *   Utilize the pre-installed `@supabase/auth-ui-react` library for a quick and robust implementation. Import the `Auth` component from it.\n\n3.  **Integrate and Style with shadcn/ui:**\n    *   In your `login/page.tsx`, render the `AuthForm` component.\n    *   To ensure the form's appearance aligns with the project's `shadcn/ui` theme, wrap the Supabase `Auth` component within `shadcn/ui` components like `Card`, `CardHeader`, `CardTitle`, and `CardContent`.\n    *   Configure the `Auth` component's `appearance` prop to use the TailwindCSS theme (`theme: ThemeSupa`), which will make it easier to style consistently with the rest of the application.\n\n**Example Implementation Snippet for `src/components/auth/AuthForm.tsx`:**\n\n```tsx\n'use client';\n\nimport { Auth } from '@supabase/auth-ui-react';\nimport { ThemeSupa } from '@supabase/auth-ui-shared';\nimport { createClient } from '@/lib/supabase/client';\nimport { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';\n\nexport default function AuthForm() {\n  const supabase = createClient();\n\n  return (\n    <Card className=\"mx-auto max-w-sm\">\n      <CardHeader>\n        <CardTitle className=\"text-2xl\">Login</CardTitle>\n      </CardHeader>\n      <CardContent>\n        <Auth\n          supabaseClient={supabase}\n          appearance={{ theme: ThemeSupa }}\n          providers={['google']} // Optional: Add social providers\n          redirectTo={`${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`}\n        />\n      </CardContent>\n    </Card>\n  );\n}\n```\n</info added on 2025-09-09T20:21:31.446Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Develop Login and Registration User Interfaces",
+            "description": "Create responsive login and registration forms that interact with Supabase Auth for user sign-up and sign-in. Include basic form validation and error handling.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Create `src/app/auth/login/page.tsx` and `src/app/auth/register/page.tsx`. Implement form submission logic using Supabase `signInWithPassword` and `signUp` methods. Handle success/error states and redirect users upon successful authentication.\n<info added on 2025-09-09T20:22:49.243Z>\n**Implementation Summary:**\n\nThis subtask was completed by integrating the `@supabase/auth-ui-react` library, providing a pre-built authentication component instead of creating manual forms. This approach accelerated development while including robust features like social logins and built-in validation.\n\n**Key Implementation Details:**\n\n*   **Component Usage:** The primary implementation in `src/app/auth/login/page.tsx` and `src/app/auth/register/page.tsx` utilizes the `<Auth />` component from `@supabase/auth-ui-react`. This component is passed the Supabase client instance from `@/lib/supabase/client.ts` (created in subtask 3.1).\n*   **UI & Theming:** The auth forms are wrapped in `Card` components from `shadcn/ui` for layout consistency. The `<Auth />` component itself is styled using `ThemeSupa` from `@supabase/auth-ui-shared`, customized with the project's brand colors.\n*   **Authentication Flow:**\n    *   Social authentication for Google and GitHub is enabled via the `providers` prop.\n    *   A new callback route, `src/app/auth/callback/page.tsx`, was created to handle the server-side code exchange after an OAuth or email link sign-in.\n    *   The `redirectTo` prop on the `<Auth />` component is configured to use this callback route, which finalizes the session and redirects the user to the dashboard.\n*   **Supporting Pages:** An `src/app/unauthorized/page.tsx` was also created to provide a clear access-denied page for users.\n</info added on 2025-09-09T20:22:49.243Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Establish User Profile Management and Role Assignment",
+            "description": "Implement functionality to manage user profiles (e.g., name, email) and assign roles (customer, cleaner, admin) upon registration or via an admin interface. Store roles in a Supabase `public.profiles` table.",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Create a `public.profiles` table in Supabase with columns like `id` (FK to `auth.users`), `role` (enum: 'customer', 'cleaner', 'admin'), and other profile fields. Implement a Supabase trigger or RLS policy to set a default 'customer' role on new user signup. Create a basic profile display page at `src/app/profile/page.tsx`.\n<info added on 2025-09-09T20:24:57.200Z>\n**Implementation Update:**\n\n*   **Profile Management UI:** A complete profile management page has been created at `src/app/profile/page.tsx`. It allows users to view and edit their `full_name` and `phone` number, leveraging `shadcn/ui` components for the interface.\n*   **Profile State Management:** A custom hook, `src/hooks/useProfile.ts`, was developed to fetch, manage, and update user profile data from the `profiles` table in real-time, reacting to Supabase auth state changes.\n*   **Component-Level RBAC:** Role-based access control has been implemented at the component level. This includes a generic `src/components/auth/RoleGuard.tsx` and specialized wrapper components like `AdminOnly`, `CleanerOnly`, and `CustomerOnly` to conditionally render UI elements based on the user's role.\n*   **Database Integration:** The implementation successfully utilizes the existing `handle_new_user()` trigger in Supabase, which automatically creates a profile with a default 'customer' role upon new user signup.\n*   **Dashboard Differentiation:** The main dashboard now displays different content based on the logged-in user's role, making use of the new role-based components.\n\n**Note:** The user has indicated that the work for the next subtask, 3.4 (Implement Role-Based Access Control Middleware), may have already been completed as part of subtask 3.1, which established protected routes. This should be verified before proceeding.\n</info added on 2025-09-09T20:24:57.200Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Role-Based Access Control Middleware",
+            "description": "Develop a Next.js middleware (`middleware.ts`) to intercept requests and enforce role-based access control, redirecting unauthorized users based on their assigned roles.",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "Create `src/middleware.ts`. Use Supabase auth helpers to get the user session and retrieve the user's role from the `public.profiles` table. Define protected routes (e.g., `/admin`, `/cleaner`) and their required roles. Redirect users without the necessary role to a login page or an access denied page.\n<info added on 2025-09-09T20:25:36.330Z>\nCodebase analysis confirms the user's report. The file `src/middleware.ts` is present and fully implements the required role-based access control logic.\n\n**Analysis Details:**\n- **File:** `src/middleware.ts`\n- **Implementation:** The middleware leverages `@supabase/auth-helpers-nextjs` by using `createMiddlewareClient` to instantiate a Supabase client and retrieve the user's session.\n- **Pattern:** A `const` object maps protected route prefixes (e.g., `/admin`, `/cleaner`, `/dashboard`) to their required role(s).\n- **Logic:**\n    1. It intercepts requests and checks if the `pathname` matches a protected route.\n    2. If a session does not exist for a protected route, it redirects to `/auth/login`.\n    3. If a session exists, it queries the `public.profiles` table to get the user's `role`.\n    4. It validates the user's role against the required roles for the path. If the role is invalid, it redirects to an `/unauthorized` page.\n- **Configuration:** The `config.matcher` in `src/middleware.ts` is correctly configured to exclude static assets and public routes, ensuring the middleware only runs on necessary application pages.\n\nThis existing implementation fully satisfies the requirements of this subtask.\n</info added on 2025-09-09T20:25:36.330Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Apply Protected Route Guards and Role-Specific UI Elements",
+            "description": "Apply the implemented role-based access control to specific application routes and conditionally render UI elements based on the authenticated user's role.",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "Update relevant page components (e.g., `src/app/admin/page.tsx`, `src/app/cleaner/page.tsx`, `src/app/customer/page.tsx`) to be protected by the middleware. Implement conditional rendering in navigation menus, dashboards, or other UI components to show/hide features based on the logged-in user's role.\n<info added on 2025-09-09T20:28:20.710Z>\n**Implementation Summary:**\n\nThe `src/components/layout/header.tsx` component has been significantly updated to provide role-aware navigation. It now conditionally renders UI based on authentication status and user role, leveraging the `useProfile` hook for real-time user data.\n\n-   **Role-Specific Navigation:**\n    -   A user profile dropdown menu now displays the user's name, avatar, and a color-coded role badge (red for admin, blue for cleaner, green for customer).\n    -   Links to the Admin (`/admin`) and Cleaner (`/cleaner`) dashboards are conditionally shown in the navigation and dropdown menu based on the user's role.\n    -   Logout functionality with session cleanup has been implemented.\n\n-   **Dashboard Implementation:**\n    -   The `src/app/admin/page.tsx` dashboard has been built out with components for system stats, user management, and activity monitoring.\n    -   The `src/app/cleaner/page.tsx` dashboard includes features for managing job schedules, tracking earnings, and viewing reviews.\n    -   These pages, along with the customer dashboard, are protected by both the server-side middleware (from subtask 3.4) and client-side `RoleGuard` components (from subtask 3.3) to prevent unauthorized access.\n\n-   **UI Enhancements:**\n    -   Reusable UI elements like role-specific icons and badges have been created using shadcn/ui and Tailwind CSS, ensuring a consistent design.\n</info added on 2025-09-09T20:28:20.710Z>",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Shared UI System with shadcn/ui Components",
+        "description": "Set up the shared UI component system using shadcn/ui and create reusable components for the cleaning services app.",
+        "details": "Install and configure shadcn/ui, create custom theme for Shalean Cleaning Services, build reusable components (buttons, forms, cards, modals), and establish consistent design system with TailwindCSS.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "3"
+        ],
+        "testStrategy": "Test component rendering, verify design consistency, and ensure all components work across different screen sizes.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Initialize shadcn/ui",
+            "description": "Set up the shadcn/ui CLI and initialize the project, integrating it with the existing Next.js and TailwindCSS setup.",
+            "dependencies": [],
+            "details": "Run `npx shadcn-ui@latest init` in the project root. Follow the prompts to configure `components.json`, update `tailwind.config.js` with shadcn/ui presets, and add necessary CSS variables to `src/app/globals.css`. Choose default options for base color for now.",
+            "status": "done",
+            "testStrategy": "Verify `components.json` is created in the project root, `tailwind.config.js` is updated with shadcn/ui's `preset` configuration, and `src/app/globals.css` contains the required CSS variables for shadcn/ui's theme."
+          },
+          {
+            "id": 2,
+            "title": "Define Shalean Cleaning Services Custom Theme",
+            "description": "Configure TailwindCSS to incorporate Shalean Cleaning Services' brand colors and typography, establishing a consistent visual identity.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Modify `tailwind.config.js` to extend the `theme` section with custom `colors` (e.g., primary, secondary, accent, background, foreground) and `fontFamily` (if custom fonts are used) specific to Shalean Cleaning Services. Ensure these custom colors are reflected in the CSS variables defined in `src/app/globals.css` as per shadcn/ui's theming approach.\n<info added on 2025-09-09T20:57:59.524Z>\n**Implementation Summary:**\nThe custom theme has been successfully configured in `tailwind.config.ts` and `src/app/globals.css`.\n\n- **Color Palette Defined:**\n  - **Primary:** `#1E88E5` (brand-blue)\n  - **Secondary:** `#E3F2FD` (sky blue)\n  - **Accent:** `#AEEA00` (brand-green)\n- **Theming:** CSS variables for both light and dark modes have been defined in `src/app/globals.css` to support the new color palette, aligning with shadcn/ui's methodology.\n- **Verification:** A new page was created at `/theme-test` to visually confirm the theme's application and color contrast.\n- **Accessibility:** The chosen color combinations were verified to meet WCAG 2.1 AA contrast ratio standards.\n</info added on 2025-09-09T20:57:59.524Z>",
+            "status": "done",
+            "testStrategy": "Apply custom colors to a test element (e.g., a simple div with `bg-primary` or `text-secondary`) and verify the correct brand color is rendered. Check if custom fonts are applied if specified in the configuration."
+          },
+          {
+            "id": 3,
+            "title": "Implement `cn` Utility and Add Core UI Components",
+            "description": "Create the `cn` utility function for conditional class merging and add foundational shadcn/ui components like Button, Input, and Label.",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "Install `clsx` and `tailwind-merge` packages. Create `src/lib/utils.ts` (if it doesn't exist) and implement the `cn` utility function. Use `npx shadcn-ui@latest add button input label` to add these components to `src/components/ui`. Integrate them into a simple test page or a temporary component to ensure correct rendering and styling with the custom theme.\n<info added on 2025-09-09T20:58:45.577Z>\n**Update:**\nThe `cn` utility function has been successfully implemented in `src/lib/utils.ts`. Core UI components (`Button`, `Input`, `Label`) have been added to `src/components/ui` via the shadcn/ui CLI. A comprehensive test page was used to verify that all components, including all `Button` variants (default, secondary, outline, ghost, destructive), correctly render and integrate the custom Shalean brand colors and theme. The foundational UI layer is now validated and ready for building higher-order reusable components.\n</info added on 2025-09-09T20:58:45.577Z>",
+            "status": "done",
+            "testStrategy": "Verify `src/lib/utils.ts` exists and contains the `cn` function. Render a `Button`, `Input`, and `Label` on a page and confirm they display correctly with the defined custom theme colors and typography."
+          },
+          {
+            "id": 4,
+            "title": "Develop Reusable Card and Form Components",
+            "description": "Integrate and customize shadcn/ui's Card and Form components to create reusable UI blocks for displaying information and handling user input.",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "Use `npx shadcn-ui@latest add card form` to add these components to `src/components/ui`. Create a generic `Card` component wrapper (e.g., `src/components/shared/ShaleanCard.tsx`) that utilizes shadcn's `Card` primitives and can accept children and props for title/description. Develop a basic `Form` structure (e.g., `src/components/shared/ShaleanForm.tsx`) using shadcn/ui's `Form` primitives, demonstrating how to group inputs and handle submission (without actual backend logic).\n<info added on 2025-09-09T21:01:34.022Z>\nThe initial scope was expanded to build a more robust and specialized set of components.\n\n**Card Components:**\n- A flexible `ShaleanCard` component was created in `src/components/shared/cards/ShaleanCard.tsx`. It uses `cva` to support multiple `variant` props (`default`, `primary`, `secondary`, `accent`, `outline`) and `size` props (`sm`, `md`, `lg`), all aligned with the custom theme in `tailwind.config.ts`.\n- Specialized cards were developed for specific use cases:\n  - `src/components/shared/cards/ServiceCard.tsx`: Displays service details, including pricing and features, intended for the service selection page.\n  - `src/components/shared/cards/BookingCard.tsx`: Designed to show booking summaries with status indicators, for use in user dashboards.\n\n**Form Components:**\n- A foundational `ShaleanForm.tsx` was created to wrap `react-hook-form` logic, but the implementation focused on building out complete, validated forms.\n- Specialized forms were built in `src/components/shared/forms/`:\n  - `ContactForm.tsx`: A standard contact form with client-side validation using a Zod schema.\n  - `BookingForm.tsx`: A comprehensive form for creating new bookings, featuring numerous fields and complex validation rules managed with Zod.\n\n**Testing and Demonstration:**\n- A dedicated test page was created at `src/app/components-test/page.tsx` to visually demonstrate all new card and form components, including their different variants and states. This serves as a living style guide and testing ground for the new UI elements.\n</info added on 2025-09-09T21:01:34.022Z>",
+            "status": "done",
+            "testStrategy": "Create a page displaying multiple instances of the custom `ShaleanCard` component with different content. Implement a simple form using the `ShaleanForm` components and verify its structure and basic interaction (e.g., input fields are present and styled correctly)."
+          },
+          {
+            "id": 5,
+            "title": "Build Reusable Modal/Dialog Component",
+            "description": "Create a generic, reusable modal/dialog component using shadcn/ui's Dialog primitive for consistent pop-up interactions across the application.",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "Use `npx shadcn-ui@latest add dialog` to add the Dialog component to `src/components/ui`. Develop a custom `Modal` component (e.g., `src/components/shared/ShaleanModal.tsx`) that wraps the shadcn `Dialog` and provides common functionalities like opening/closing, title, description, and a slot for custom content. Ensure it can be easily triggered from different parts of the application.\n<info added on 2025-09-09T21:03:12.759Z>\nBased on the analysis, the following implementation details were added:\n\n- A flexible base modal component was created at `src/components/shared/ShaleanModal.tsx`. This component wraps the shadcn `Dialog` and uses `cva` (class-variance-authority) to support multiple `size` (`sm`, `md`, `lg`, `xl`, `full`) and `variant` (`default`, `destructive`, `warning`, `success`) props.\n- Several specialized modals were built using the `ShaleanModal` base for common application use cases:\n    - `ConfirmationModal`: A modal for destructive actions, featuring loading states and confirmation logic.\n    - `BookingModal`: Designed to display booking details with specific action buttons.\n    - `ServiceSelectionModal`: A modal for the service selection process, providing clear visual feedback.\n- All modal variants are styled using the custom Shalean brand colors defined in `tailwind.config.ts`, ensuring design consistency.\n- A comprehensive test and demonstration page was created to showcase all modal variants and states, likely located at a route like `/components-test`.\n- Accessibility has been addressed through the underlying Radix UI primitives, ensuring proper keyboard navigation and focus management.\n</info added on 2025-09-09T21:03:12.759Z>",
+            "status": "done",
+            "testStrategy": "Implement a button on a test page that triggers the custom `ShaleanModal` component. Verify the modal opens and closes correctly, displays its title and content, and has proper overlay behavior and accessibility features."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Service Management System (Admin)",
+        "description": "Create admin interface for managing service categories, items, and extras with full CRUD operations.",
+        "details": "Build admin dashboard for service management, create forms for adding/editing service categories, service items, and extras, implement pricing management, and add service activation/deactivation functionality.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "4"
+        ],
+        "testStrategy": "Test CRUD operations for services, verify pricing calculations, and ensure admin-only access is properly enforced.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Database Schema and Core API for Services",
+            "description": "Establish the foundational data models and backend API endpoints for service management.",
+            "dependencies": [],
+            "details": "Define Prisma models for `ServiceCategory`, `ServiceItem`, and `ServiceExtra` including fields like `name`, `description`, `price`, `isActive`, and relationships (e.g., `ServiceItem` linked to `ServiceCategory`). Implement core API routes (or tRPC procedures) for `GET`, `POST`, `PUT`, `DELETE` operations for all three service entities, ensuring proper data validation and error handling on the backend.\n<info added on 2025-09-09T21:11:37.495Z>\n**Implementation Plan:**\n\nWith the backend API for service management now complete, the next step is to build the corresponding admin user interface for `ServiceCategory`. This UI will consume the newly created API endpoints.\n\n**1. Create the Service Categories Page:**\n-   Create a new page at `src/app/admin/services/categories/page.tsx`.\n-   This page will serve as the main view for listing and managing all service categories.\n-   It should be protected by the existing admin authentication middleware.\n\n**2. Implement the Category List View:**\n-   Within the page, create a data table component (e.g., `src/app/admin/services/categories/_components/category-table.tsx`) to display the categories.\n-   Use a data fetching hook (e.g., TanStack Query's `useQuery`) to call the `GET /api/services/categories` endpoint.\n-   The table should display key fields like `name`, `description`, and `isActive` status.\n-   Include action buttons for each row: \"Edit\" and \"Delete\".\n\n**3. Develop the Create/Edit Form:**\n-   Create a reusable form component, potentially within a modal dialog (leveraging existing UI components from `src/components/ui` if available, like `Dialog` and `Form`).\n-   This form will be used for both creating new categories and editing existing ones.\n-   **Create:** A \"New Category\" button on the main page should open this form. On submission, it will make a `POST` request to `/api/services/categories`.\n-   **Edit:** The \"Edit\" button in the table should open the form, pre-populated with data fetched from `GET /api/services/categories/[id]`. On submission, it will make a `PUT` request to `/api/services/categories/[id]`.\n-   Utilize the Zod validation schemas (likely located in a shared directory like `src/lib/validations/`) with a library like `react-hook-form` for client-side validation.\n\n**4. Implement the Delete Functionality:**\n-   The \"Delete\" button in the table should trigger a confirmation dialog (e.g., `AlertDialog`) to prevent accidental deletion.\n-   Upon confirmation, make a `DELETE` request to `/api/services/categories/[id]`.\n-   The API's built-in safety checks will prevent deletion if the category has dependent `ServiceItem`s, and the UI should be prepared to handle and display this specific error message to the admin.\n\n**5. State Management and API Interaction:**\n-   It is recommended to use TanStack Query (`@tanstack/react-query`) for managing server state.\n-   `useQuery` for fetching the list of categories.\n-   `useMutation` for `POST`, `PUT`, and `DELETE` operations.\n-   On successful mutations (create, update, delete), invalidate the `useQuery` key for the category list to automatically refetch and display the updated data.\n</info added on 2025-09-09T21:11:37.495Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Admin UI for Service Categories",
+            "description": "Develop the user interface for managing service categories within the admin dashboard.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Create a new dedicated page or section within the existing `/dashboard` route for 'Service Management'. Implement a table or list view to display existing `ServiceCategory` entries. Develop a modal form using `shadcn/ui` components, `react-hook-form`, and `zod` for creating new and editing existing `ServiceCategory` entries. Integrate these forms with the API endpoints defined in Subtask 5.1 for CRUD operations.\n<info added on 2025-09-09T21:16:17.088Z>\n**Implementation Summary:**\n\nA dedicated page for Service Category management has been created at `/app/admin/services/categories/page.tsx`. This page serves as the main entry point and orchestrates the display and management of categories.\n\n- **Data & State Management:** A custom hook, `_hooks/use-categories.ts`, was implemented to encapsulate all data-fetching and mutation logic. It leverages `react-query` (`useQuery` for fetching, `useMutation` for CUD operations) to interact with the category API endpoints. The hook also implements optimistic updates for a smoother user experience when creating, updating, or deleting categories.\n\n- **UI Components:**\n  - **`_components/category-table.tsx`**: Displays the list of categories using a responsive, card-based layout built with `shadcn/ui`'s `<Card>` component. Each card includes status badges, metadata, and an action `<DropdownMenu>` for Edit and Delete actions.\n  - **`_components/category-form.tsx`**: A modal form, utilizing `shadcn/ui`'s `<Dialog>`, for creating and editing categories. Form state and validation are managed by `react-hook-form` and a corresponding `zod` schema, ensuring all required fields (`name`, `description`, `icon`, `sort_order`, `is_active`) are correctly handled.\n  - **`_components/delete-category-dialog.tsx`**: A confirmation dialog built with `<AlertDialog>` to prevent accidental deletions, including a server-side check to prevent deletion of categories that contain service items.\n\n- **Navigation & UX:** The main admin navigation has been updated to include a link to the new \"Service Categories\" page. The page includes breadcrumbs for easy navigation, and all interactive elements feature appropriate loading states, disabled states, and error handling to inform the user of the system's status.\n</info added on 2025-09-09T21:16:17.088Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Admin UI for Service Items with Pricing",
+            "description": "Build the admin interface for managing individual service items, including their pricing.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Create a dedicated section or page for managing `ServiceItem` entries. Implement a table/list view for `ServiceItems`, allowing filtering by `ServiceCategory`. Develop a modal form using `shadcn/ui`, `react-hook-form`, and `zod` for creating and editing `ServiceItem` entries. Include fields for name, description, price (with appropriate type/validation), and a dropdown to select its associated `ServiceCategory`. Integrate with the API endpoints from Subtask 5.1.\n<info added on 2025-09-09T21:21:31.160Z>\n**Implementation Update:**\n\nA comprehensive admin UI for service items has been implemented, expanding on the initial requirements.\n\n*   **File Structure & Components:**\n    *   **Main Page:** `app/admin/services/items/page.tsx` provides the main interface with authentication, filtering, and stats.\n    *   **Custom Hook:** `app/admin/services/items/_hooks/use-items.ts` centralizes all data logic, handling full CRUD operations, status toggling (`is_active`), and optimistic updates for an improved user experience.\n    *   **Item Table:** `app/admin/services/items/_components/item-table.tsx` displays items in a card-based layout, showing pricing, duration, category, and status badges. It also incorporates search and category filtering controls.\n    *   **Item Form:** The `app/admin/services/items/_components/item-form.tsx` modal now includes fields for `duration_minutes`, `sort_order`, and `is_active`, alongside the originally specified fields.\n    *   **Delete Dialog:** A dedicated `app/admin/services/items/_components/delete-item-dialog.tsx` ensures data integrity by performing a safety check that prevents the deletion of service items already linked to bookings.\n\n*   **Key Feature Enhancements:**\n    *   **Full CRUD & Status Toggle:** The UI supports creating, reading, updating, deleting, and toggling the active/inactive status of service items via the `use-items.ts` hook.\n    *   **Expanded Form Schema:** The form and underlying Zod schema now manage `duration_minutes` and `sort_order` for more detailed service definition.\n    *   **Advanced Filtering:** Functionality includes both filtering by `ServiceCategory` and a text-based search across item names and descriptions.\n    *   **Optimistic Updates:** The interface provides immediate feedback on actions like updates and status changes, enhancing perceived performance.\n    *   **Navigation:** The section is now integrated into the admin dashboard with corresponding breadcrumb navigation.\n</info added on 2025-09-09T21:21:31.160Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Admin UI for Service Extras with Pricing and Activation",
+            "description": "Develop the admin interface for managing service extras, including pricing and activation status.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Create a dedicated section or page for managing `ServiceExtra` entries. Implement a table/list view for `ServiceExtras`. Develop a modal form using `shadcn/ui`, `react-hook-form`, and `zod` for creating and editing `ServiceExtra` entries. Include fields for name, description, price, and a toggle/checkbox for `isActive` status. Integrate with the API endpoints from Subtask 5.1.\n<info added on 2025-09-09T21:25:03.644Z>\n**Implementation Summary:**\n\nThe admin UI for Service Extras has been implemented in the `app/admin/services/extras/` directory, following the established project architecture.\n\n- **Primary Component:** The main page is `app/admin/services/extras/page.tsx`, which integrates search functionality and renders the list of extras.\n\n- **Data and State Management:** A custom hook, `app/admin/services/extras/_hooks/use-extras.ts`, was created to manage all logic. It combines a Zustand store for managing UI state (e.g., modal visibility) with TanStack React Query (`useQuery`, `useMutation`) for handling all asynchronous CRUD operations. The hook also implements optimistic updates for a smoother UX and specific error handling for deletion conflicts (e.g., when an extra is tied to a booking).\n\n- **UI Components:**\n    - **`_components/extra-table.tsx`**: Displays extras using a `Card`-based layout. Each card includes the price, an active/inactive `Badge`, and a `DropdownMenu` for Edit, Delete, and Toggle Status actions.\n    - **`_components/extra-form.tsx`**: A modal `Dialog` built with `shadcn/ui` for creating and editing extras. It leverages `react-hook-form` for state management and `zod` for validation via the `zodResolver`, using the `extraSchema` defined in `lib/schemas.ts`. The form includes all required fields, with the `price` field correctly configured as a number input and `is_active` as a `Switch`.\n    - **`_components/delete-extra-dialog.tsx`**: A standard `AlertDialog` component to provide a confirmation step before deleting an extra.\n</info added on 2025-09-09T21:25:03.644Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Integrate Service Management into Dashboard and Finalize CRUD Operations",
+            "description": "Integrate all service management components into the main admin dashboard and complete full CRUD functionality.",
+            "dependencies": [
+              "5.2",
+              "5.3",
+              "5.4"
+            ],
+            "details": "Add navigation links for 'Service Categories', 'Service Items', and 'Service Extras' to the main admin dashboard sidebar or navigation menu. Implement the activation/deactivation toggle functionality directly within the list views for `ServiceItem` and `ServiceExtra` entries, updating their `isActive` status via API calls. Ensure robust delete functionality for all three entities (categories, items, extras) with confirmation prompts. Conduct a final review for consistent UI/UX, error handling, and responsiveness across all service management forms and views.\n<info added on 2025-09-09T21:26:42.933Z>\nA central service management hub has been created at `app/admin/services/page.tsx`, providing a unified overview with real-time statistics (counts for categories, items, extras) and quick-access cards to each management area.\n\nIn line with this, the main admin dashboard navigation has been updated to feature a single \"Manage Services\" link, consolidating the previously separate entry points.\n\nThe implementation confirms full CRUD functionality, including:\n- Deletion protection with dependency checks (e.g., preventing deletion of a category if it has active service items).\n- Consistent UI/UX with breadcrumb navigation across all service management pages.\n\nTechnical implementation details include the use of entity-specific custom hooks for state management with optimistic updates and Zod schemas for robust form validation.\n</info added on 2025-09-09T21:26:42.933Z>",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Customer Landing Page with SEO Optimization",
+        "description": "Create the main landing page for customers with SEO optimization, structured data, and service discovery.",
+        "details": "Build responsive landing page, implement SEO optimization (meta tags, structured data, sitemap, robots.txt), create service browsing interface, and add call-to-action elements for booking.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "5"
+        ],
+        "testStrategy": "Test page loading performance, verify SEO elements, check structured data validation, and ensure mobile responsiveness.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Responsive Landing Page Structure",
+            "description": "Create the foundational responsive layout for the customer landing page, including hero section, main content area, and footer.",
+            "dependencies": [],
+            "details": "Develop `src/pages/index.tsx` to establish the primary layout. Utilize existing UI component patterns (e.g., `src/components/ui/Button.tsx`, `src/components/Layout.tsx`) and styling conventions (e.g., CSS Modules or Tailwind CSS if configured). Ensure mobile-first responsiveness.",
+            "status": "done",
+            "testStrategy": "Verify page renders correctly on various screen sizes (desktop, tablet, mobile) using browser developer tools. Check for proper element alignment and responsiveness."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Core SEO Meta Tags",
+            "description": "Add essential meta tags to the landing page for improved search engine visibility and social sharing.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Implement `next/head` within `src/pages/index.tsx` to include dynamic `title`, `description`, `keywords`, `og:title`, `og:description`, `og:image`, `twitter:card`, and `twitter:creator` meta tags. Ensure values are appropriate for the booking service.",
+            "status": "done",
+            "testStrategy": "Inspect page source to confirm meta tags are present and correctly populated. Use browser developer tools to check Open Graph and Twitter Card previews."
+          },
+          {
+            "id": 3,
+            "title": "Implement Structured Data (JSON-LD)",
+            "description": "Embed structured data using JSON-LD to provide search engines with explicit information about the business and services.",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "Add `<script type=\"application/ld+json\">` tags within `next/head` in `src/pages/index.tsx`. Include relevant schema types such as `LocalBusiness`, `Service`, and `Organization` with appropriate properties (e.g., name, address, contact info, service offerings).",
+            "status": "done",
+            "testStrategy": "Validate structured data using Google's Rich Results Test and Schema.org Validator to ensure correctness and identify any errors."
+          },
+          {
+            "id": 4,
+            "title": "Develop Service Browsing Interface",
+            "description": "Create a section on the landing page allowing customers to browse available cleaning services.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Design and implement a UI component (e.g., `ServiceList.tsx`) within `src/pages/index.tsx` to display a list of services. Each service should have a title, description, and potentially an image. For initial implementation, use mock data or a static JSON file for service details.",
+            "status": "done",
+            "testStrategy": "Verify all service items are displayed correctly. Check responsiveness of the service list. Ensure basic interaction (e.g., clicking a service card) works if implemented."
+          },
+          {
+            "id": 5,
+            "title": "Generate Sitemap, Robots.txt & Add Call-to-Action Elements",
+            "description": "Finalize technical SEO by creating sitemap and robots.txt, and integrate prominent call-to-action buttons.",
+            "dependencies": [
+              "6.1",
+              "6.4"
+            ],
+            "details": "Create `public/sitemap.xml` and `public/robots.txt` files, ensuring they are correctly configured to allow search engine crawling of the landing page. Integrate clear and prominent call-to-action buttons (e.g., \"Book Now\", \"View Services\") in key areas of `src/pages/index.tsx`, linking to relevant sections or future booking flows.",
+            "status": "done",
+            "testStrategy": "Verify `sitemap.xml` and `robots.txt` are accessible at their respective URLs. Check that CTAs are visible, clickable, and navigate to the correct (even if placeholder) destinations."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Multi-Step Booking Form with Guest Support",
+        "description": "Implement the complete multi-step booking flow: service selection → details → schedule → address → review → payment.",
+        "details": "Create multi-step booking form with progress indicator, implement service selection with categories and extras, add scheduling interface with time slot selection, create address management (new/saved addresses), implement booking review and confirmation, and add guest booking support with draft persistence.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "6"
+        ],
+        "testStrategy": "Test complete booking flow, verify form validation, test guest vs authenticated user flows, and ensure data persistence works correctly.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core Multi-Step Booking Form Structure",
+            "description": "Create the main multi-step form component, including a progress indicator, step navigation (next/back buttons), and state management for the current step and booking data.",
+            "dependencies": [],
+            "details": "Set up the `/booking` route. Design the overall layout using shadcn/ui components. Implement a state management solution (e.g., React Context or Zustand) to hold booking draft data across steps. Create a visual progress indicator that updates with step changes.\n<info added on 2025-09-09T21:45:56.934Z>\nWith the `ServiceSelectionStep.tsx` component and `BookingContext` now in place, the next step is to implement the full functionality for service selection.\n\n**Implementation Plan:**\n1.  **Fetch Service Data:** In `ServiceSelectionStep.tsx`, implement the logic to fetch service categories, main services, and optional extras from your Supabase tables (e.g., `service_categories`, `services`).\n2.  **Render Categories and Services:**\n    *   Use the `Accordion` component from shadcn/ui to display the fetched service categories.\n    *   Inside each accordion item, render the associated services using `Card` components. Each card should display the service name, description, and price.\n3.  **Implement Selection and Quantity Controls:**\n    *   For services that can be selected once (e.g., 'Standard Clean'), use a \"Select\" button.\n    *   For services with variable quantities (e.g., 'Bedrooms'), add quantity controls (e.g., an `Input` with plus/minus buttons).\n    *   Display optional 'Extras' (e.g., 'Inside Fridge') as a list of `Checkbox` items or similar selectable components.\n4.  **Integrate with State:**\n    *   On any user interaction (selection, quantity change), call the appropriate action from `BookingContext` to update the `formData` (e.g., `updateFormData({ services: [...], extras: [...] })`).\n    *   Ensure the component correctly reflects the current state from the context, especially when the user navigates back to this step.\n5.  **Display Running Subtotal:** Add a summary section within the step that dynamically calculates and displays a subtotal based on the items currently in the `formData`.\n</info added on 2025-09-09T21:45:56.934Z>",
+            "status": "done",
+            "testStrategy": "Verify correct rendering of the multi-step form shell. Test step navigation (next/back buttons) updates the current step and progress indicator. Ensure booking data state can be updated and persisted across step changes within the form."
+          },
+          {
+            "id": 2,
+            "title": "Develop Service Selection and Details Step",
+            "description": "Implement the first two steps of the booking flow: service category and item selection, and adding optional extras. Fetch service data from Supabase.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Create components for displaying `service_categories`, `service_items`, and `extras` from the Supabase database. Allow users to select services and quantities. Integrate with the multi-step form's shared data state. Implement form validation using `react-hook-form` and `zod` for required selections.\n<info added on 2025-09-09T21:47:34.800Z>\n### Implementation Update & Next Steps\n\nThe core UI and data flow for the service selection step have been successfully implemented, establishing a strong foundation.\n\n**Completed Implementation:**\n-   **Component Structure:** The step is orchestrated by `components/booking/ServiceSelectionStep.tsx`, which correctly fetches data using queries from `lib/supabase/queries.ts`.\n-   **UI Components:**\n    -   `components/booking/ServiceCategorySelector.tsx`: Manages the selection of a service category.\n    -   `components/booking/ServiceItemCard.tsx`: Displays individual services with quantity controls, filtering based on the selected category.\n    -   `components/booking/ExtrasSelector.tsx`: Allows for the selection of optional extras.\n    -   `components/booking/BookingSummary.tsx`: Provides a real-time summary of the user's selections and total cost.\n-   **State Management:** All selections and quantity changes correctly update the shared `BookingContext`, ensuring data persistence across the multi-step form.\n-   **Data Fetching:** Data for service categories, items, and extras is fetched from Supabase with appropriate loading and error states.\n\n**Next Steps: Form Validation**\n\nThe final requirement for this subtask is to integrate form validation to ensure a valid selection is made before proceeding.\n\n1.  **Update Zod Schema:**\n    -   In `lib/schemas.ts`, modify the `BookingSchema` to enforce that at least one service item is selected. The `services` object should not be empty.\n    -   Example validation using `refine`:\n        ```typescript\n        // In lib/schemas.ts\n        export const BookingSchema = z.object({\n          // ... other fields\n          services: z.record(z.string(), z.object({\n            quantity: z.number().min(1),\n            // ... other service properties\n          })).refine(services => Object.keys(services).length > 0, {\n            message: \"Please select at least one service to continue.\",\n          }),\n          // ...\n        });\n        ```\n\n2.  **Integrate `react-hook-form`:**\n    -   The main multi-step form wrapper (likely in `app/book/page.tsx` or a dedicated `BookingForm` component) should initialize `useForm` with the `BookingSchema`.\n    -   The `ServiceSelectionStep` does not need to be a form itself. The global state from `BookingContext` will serve as the data source for the main form.\n    -   The \"Next Step\" button's `onClick` handler should trigger `form.trigger()` to validate the current step's fields (in this case, the `services` field from the context).\n\n3.  **Display Validation Errors:**\n    -   If validation fails, use the `form.formState.errors` object to display an error message near the service selection area or the \"Next Step\" button. This will prevent the user from advancing with an empty cart.\n</info added on 2025-09-09T21:47:34.800Z>",
+            "status": "done",
+            "testStrategy": "Verify services and extras are fetched and displayed correctly. Test selection and deselection of services/extras. Ensure selected data is correctly added to the booking draft state. Test form validation for required selections before proceeding to the next step."
+          },
+          {
+            "id": 3,
+            "title": "Implement Scheduling and Address Management Steps",
+            "description": "Create the scheduling interface for date and time slot selection, and the address management step allowing users to select saved addresses or input new ones.",
+            "dependencies": [
+              "7.1",
+              "7.2"
+            ],
+            "details": "Integrate a date/time picker component (e.g., from shadcn/ui or a compatible library). Implement logic to display available time slots. For address management, fetch existing `addresses` for authenticated users from Supabase. Provide a form for new address input for both guests and authenticated users. Store selected/new address and schedule data in the booking draft.\n<info added on 2025-09-09T21:49:44.260Z>\n**Implementation Summary:**\n\n**Scheduling Step (`components/booking/ScheduleStep.tsx`):**\n- Integrated the `shadcn/ui` `Calendar` component for date selection.\n- Implemented date validation logic to enforce a selectable range from tomorrow up to 3 months ahead, likely using `date-fns`.\n- Dynamically generated 30-minute time slots (8:00 AM - 6:00 PM) and implemented availability logic, including mock unavailable times and weekend restrictions.\n- The selected time is reset when the date changes to ensure re-validation.\n- Time slots are rendered in a responsive grid, with conditional styling for `disabled` and `selected` states.\n- The selected `scheduledAt` (Date object) is saved to the `BookingContext`.\n\n**Address Management Step (`components/booking/AddressStep.tsx`):**\n- For authenticated users, a `useEffect` hook fetches existing addresses from the Supabase `addresses` table using a query function (e.g., in `lib/supabase/queries.ts`).\n- Saved addresses are displayed in selectable cards, showing address type (home, office, etc.) and a default indicator.\n- A toggle allows users to switch between selecting a saved address and inputting a new one.\n- The \"New Address\" form is built with `react-hook-form` and validated against a `zod` schema, using `shadcn/ui` components (`Input`, `Select`).\n- The selected existing address or the newly entered address data is stored in the `address` field of the `BookingContext`.\n</info added on 2025-09-09T21:49:44.260Z>",
+            "status": "done",
+            "testStrategy": "Verify date and time selection works and updates the booking draft. Test fetching and display of saved addresses for logged-in users. Test new address input and validation. Ensure selected/new address and schedule data are correctly stored in the booking draft state."
+          },
+          {
+            "id": 4,
+            "title": "Develop Booking Review and Confirmation with Guest Draft Persistence",
+            "description": "Implement the final review step, allowing users to confirm all booking details. Implement the logic to save booking drafts for guest users (e.g., in `localStorage`) and the final booking to Supabase.",
+            "dependencies": [
+              "7.1",
+              "7.2",
+              "7.3"
+            ],
+            "details": "Display a comprehensive summary of all selected services, schedule, and address details. Create a mechanism to persist the booking draft data (e.g., using `localStorage` or `sessionStorage`) for guest users, allowing them to resume later. Implement the Supabase client-side logic to insert the final booking into `bookings` and `booking_items` tables upon confirmation. Handle user authentication status for saving.\n<info added on 2025-09-09T21:53:27.782Z>\n**Implementation Update:**\n\n**1. Booking Review Step (`ReviewStep`):**\n- A comprehensive review step has been implemented to display a full summary before confirmation.\n- It fetches service details directly from Supabase to ensure accurate, real-time pricing.\n- The summary includes:\n    - A list of selected services with quantities and individual prices.\n    - A breakdown of any selected extras and their costs.\n    - The chosen schedule, with formatted date and time.\n    - The selected delivery address (either a saved address or a new one).\n    - A section for additional user notes.\n- A real-time total cost is calculated and displayed.\n- The layout is built using a professional, responsive, card-based design with `shadcn/ui` components.\n\n**2. Guest Draft Persistence and Restoration:**\n- The `BookingContext` has been enhanced to automatically save booking progress to `localStorage` for guest users.\n- The saved draft includes metadata such as a timestamp and version number for better management and future compatibility.\n- A new `DraftRestoration` component has been created to alert users of an existing draft upon visiting the booking page.\n    - It displays an amber-themed notification with the draft's age (e.g., \"saved 2 hours ago\").\n    - Provides clear user actions: \"Continue with draft\", \"Start a new booking\", or \"Delete draft\".\n- Utility functions (`hasDraft`, `getDraftAge`, `saveDraft`, `loadDraft`, `clearDraft`) have been added to manage the draft lifecycle.\n\n**3. Booking Confirmation and Data Persistence:**\n- A new `BookingConfirmation` page is now displayed after a successful booking.\n- It features a success animation, confirmation message, and displays the final Booking ID.\n- It provides a complete summary of the confirmed booking details and payment status.\n- Includes action buttons for next steps: \"View all bookings\", \"Book another service\", and placeholders for \"Download receipt\" and \"Share booking\".\n- Upon successful booking confirmation, the logic correctly inserts the data into the Supabase `bookings` and `booking_items` tables.\n- The guest draft is automatically cleared from `localStorage` after the booking is successfully finalized.\n</info added on 2025-09-09T21:53:27.782Z>",
+            "status": "done",
+            "testStrategy": "Verify all booking details are accurately displayed in the review step. Test guest draft persistence: close and reopen browser, ensure draft is loaded. Test successful booking submission to Supabase for both authenticated and guest users (after they potentially sign up/in). Verify data integrity in Supabase tables (`bookings`, `booking_items`)."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Payment Gateway and Finalize Booking Flow",
+            "description": "Implement the payment step using Paystack and handle the post-payment success/failure flow, including updating booking status and displaying confirmation.",
+            "dependencies": [
+              "7.1",
+              "7.2",
+              "7.3",
+              "7.4"
+            ],
+            "details": "Integrate the Paystack payment gateway into the final step of the booking form. Handle payment success callbacks to update the `bookings` table status (e.g., to 'pending_payment' or 'confirmed') and record payment details in the `payments` table. Implement robust error handling for failed payments. Redirect users to a booking confirmation page or display a success message based on payment outcome.\n<info added on 2025-09-09T21:59:18.081Z>\nBased on the work completed, the following implementation details have been added:\n\n- **Booking Creation API (`/api/booking`):** An endpoint was created to handle the booking logic *before* payment. It validates all form data, calculates the final price from database values, creates records in the `bookings`, `booking_services`, and `booking_extras` tables, and generates a unique payment reference.\n- **Paystack Frontend Integration:** A `PaystackPayment` React component was developed using the `@paystack/inline-js` library. This component is initialized after a booking is successfully created via the API and handles the client-side payment flow, including success and close callbacks.\n- **Secure Webhook Handler (`/api/webhooks/paystack`):** A robust webhook endpoint was implemented to asynchronously handle payment events from Paystack. It includes:\n    - **HMAC SHA-512 Signature Verification:** Ensures that incoming webhook requests are genuinely from Paystack.\n    - **Idempotency:** Prevents duplicate processing of the same event.\n    - **Event Handling:** Processes `charge.success` events to update the `bookings` table status to 'confirmed' and records transaction details in the `payments` table.\n- **Dynamic Confirmation Page (`/booking/confirmation/[bookingId]`):** A dedicated, server-rendered page was created to display a comprehensive summary of the completed booking. It fetches all relevant booking data, including services, extras, pricing, and payment status, directly from the database using the booking ID.\n- **State and Draft Management:** Upon successful payment confirmation on the client side, the guest's booking draft is cleared from local storage (`useBookingStore`), and the user is redirected to the new confirmation page.\n- **Payment Utilities:** Helper functions were created in `lib/utils.ts` and `lib/paystack.ts` for generating payment references, currency conversion (`nairaToKobo`), and formatting.\n</info added on 2025-09-09T21:59:18.081Z>",
+            "status": "done",
+            "testStrategy": "Simulate successful and failed payments using Paystack's test modes. Verify booking status is updated correctly in Supabase (`bookings` table). Ensure payment details are accurately recorded in the `payments` table. Test redirection to confirmation page and display of appropriate success/error messages."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Paystack Payment Integration",
+        "description": "Integrate Paystack inline checkout with webhook reconciliation for secure payment processing.",
+        "details": "Set up Paystack integration, implement inline checkout flow, create webhook handler for payment confirmations, add payment status tracking, implement idempotency keys for webhook retries, and add payment failure handling.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "7"
+        ],
+        "testStrategy": "Test payment processing with test cards, verify webhook handling, test payment failures and retries, and ensure payment reconciliation works correctly.",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Email Notification System with Resend/Postmark",
+        "description": "Implement automated email notifications for booking confirmations, reminders, and status updates.",
+        "details": "Set up Resend or Postmark email service, create email templates for booking confirmations, reminders, and status updates, implement SPF/DKIM setup, create email sending functions, and add email delivery tracking.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "8"
+        ],
+        "testStrategy": "Test email delivery for all notification types, verify email content accuracy, and ensure proper email authentication setup.",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Customer Dashboard and Profile Management",
+        "description": "Create customer dashboard for managing bookings, payments, profile, and saved addresses.",
+        "details": "Build customer dashboard with booking history, payment tracking, profile management interface, saved addresses management, booking modification capabilities, and booking cancellation functionality.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "9"
+        ],
+        "testStrategy": "Test dashboard functionality, verify data accuracy, test booking modifications, and ensure proper access controls.",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Cleaner Dashboard and Job Management",
+        "description": "Create cleaner dashboard for viewing assigned jobs and updating booking status.",
+        "details": "Build cleaner dashboard with assigned jobs list, job details (date, time, address, customer info), status update interface (On My Way → Arrived → Completed), earnings tracking, job history, and rating system integration.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "9"
+        ],
+        "testStrategy": "Test cleaner dashboard functionality, verify job assignment display, test status updates, and ensure proper cleaner-only access.",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Admin Dashboard for Operations Management",
+        "description": "Create comprehensive admin dashboard for managing all aspects of the cleaning service operation.",
+        "details": "Build admin dashboard with booking management (view all, filter, assign cleaners, cancel/update), cleaner management (activate, deactivate, assign jobs, monitor ratings), payment management with webhook verification, and analytics dashboard (bookings, revenue, performance metrics).",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "11"
+        ],
+        "testStrategy": "Test admin dashboard functionality, verify data accuracy, test management operations, and ensure proper admin-only access controls.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Admin Dashboard Core Setup & Booking Overview",
+            "description": "Set up the foundational admin dashboard page, implement robust access control, and display a comprehensive overview of all bookings.",
+            "dependencies": [],
+            "details": "Create the `/admin-dashboard` route and page component. Implement server-side and client-side admin role verification using Supabase RLS and `supabase.auth.getUser()` to ensure only authorized users can access. Design the main dashboard layout, including navigation for different management sections. Fetch and display a paginated table of all bookings from the `bookings` table, including basic filtering by status (e.g., pending, confirmed, completed, cancelled) and date range. Reuse existing UI components for tables, pagination, and filters from other dashboards (e.g., customer, cleaner).\n<info added on 2025-09-10T00:44:06.495Z>\n[]\n</info added on 2025-09-10T00:44:06.495Z>",
+            "status": "done",
+            "testStrategy": "Verify only admin users can access the dashboard page, while non-admin users are redirected or denied access. Test pagination functionality for large numbers of bookings. Test filtering by various statuses and date ranges to ensure accurate results. Verify correct data display for all booking entries in the table."
+          },
+          {
+            "id": 2,
+            "title": "Advanced Booking Management Features",
+            "description": "Implement functionalities for assigning cleaners, updating booking details, and cancelling bookings directly from the admin dashboard.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Enhance the booking overview table with interactive actions for each booking. Implement a modal or dedicated form to allow admins to select and assign an available cleaner to a booking, updating the `booking_assignments` table. Develop functionality to enable admins to modify existing booking details such as date, time, service items, and customer address. Implement a secure cancellation flow that updates the booking status to 'cancelled' in the database and handles associated logic (e.g., triggering notifications, potential refund flags).\n<info added on 2025-09-10T00:46:52.571Z>\n**Implementation Summary:**\n\nThe advanced booking management features have been implemented within the admin dashboard, primarily centered around the `app/admin/dashboard/components/columns.tsx` and a new `app/admin/dashboard/components/booking-actions.tsx` component.\n\n- **Cleaner Assignment:**\n  - A new modal, `app/admin/dashboard/components/assign-cleaner-modal.tsx`, has been created. It is triggered from the `booking-actions.tsx` dropdown menu.\n  - The action is conditionally rendered, appearing only if the booking does not have an assigned cleaner.\n  - **Note:** The implementation deviates from the original plan of using a `booking_assignments` table. Instead, a `cleaner_id` column was likely added directly to the `bookings` table, and the `assignCleaner` server action in `lib/actions/booking.actions.ts` updates this field. This simplifies the data model for a 1-to-1 booking-to-cleaner assignment.\n\n- **Booking Details Editing:**\n  - An `edit-booking-modal.tsx` component allows admins to update booking details.\n  - The form facilitates changes to the service date, time, and notes. Editing of service items and customer address was not included in this implementation.\n  - The `updateBookingDetails` server action in `lib/actions/booking.actions.ts` handles the database update.\n\n- **Cancellation Flow:**\n  - The \"Cancel Booking\" option in the `booking-actions.tsx` dropdown triggers a `cancelBooking` server action.\n  - This action updates the booking's status to 'cancelled' in the database and leverages `revalidatePath` to refresh the booking table UI.\n\n- **UI and State Management:**\n  - The features are integrated into the existing `DataTable` from `app/admin/dashboard/components/data-table.tsx`.\n  - State for managing the open/closed status of the modals is handled within the `booking-actions.tsx` component using React's `useState` hook.\n  - Reusable `shadcn/ui` components like `<Dialog>`, `<DropdownMenu>`, and `<Select>` were used to build the interface.\n</info added on 2025-09-10T00:46:52.571Z>",
+            "status": "done",
+            "testStrategy": "Test assigning different cleaners to various bookings and verify the assignments are correctly recorded in the `booking_assignments` table. Test updating various fields of a booking (date, time, services, address) and confirm changes persist. Verify booking cancellation correctly updates the booking status and prevents further actions on the cancelled booking."
+          },
+          {
+            "id": 3,
+            "title": "Cleaner Management Module",
+            "description": "Develop a dedicated section for managing cleaner profiles, including activation/deactivation, job assignment overview, and performance monitoring.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Create a dedicated section or tab within the admin dashboard for cleaner management. Display a comprehensive table of all cleaners from the `cleaners` table, including their current status (active/inactive). Implement toggle functionality to activate or deactivate cleaner profiles. Develop views to show a specific cleaner's assigned jobs (past and upcoming) and their historical performance metrics, including aggregated ratings and reviews from the `bookings` table. Allow direct assignment of jobs to cleaners from their profile view.\n<info added on 2025-09-10T00:51:20.333Z>\nA new cleaner management section has been implemented at `app/admin/cleaners/page.tsx`. This page renders a `CleanerCard` (`app/admin/cleaners/components/cleaner-card.tsx`) for each cleaner, which includes a `Switch` component to toggle their `is_active` status. This action is handled by the `updateCleanerStatus` server action located in `lib/actions/cleaner.actions.ts`.\n\nFrom a dropdown menu on the cleaner's card, admins can open the newly created `CleanerProfileModal` (`app/admin/cleaners/components/cleaner-profile-modal.tsx`). This modal provides a comprehensive overview of a cleaner's performance, including calculated stats like total jobs, average rating, and total earnings. It also features a detailed, scrollable job history tab.\n\nThe job history data is fetched by the `fetchCleanerJobs` server action, which queries the `bookings` table and joins related customer, address, and payment information to provide a complete picture. While this implementation provides full visibility into cleaner performance and status, the originally planned feature for direct assignment of jobs from the profile view has not been included and should be addressed in a future task.\n</info added on 2025-09-10T00:51:20.333Z>",
+            "status": "done",
+            "testStrategy": "Test activating and deactivating cleaner profiles and verify status changes are reflected immediately. Verify correct display of assigned jobs and aggregated ratings/reviews for individual cleaners. Test assigning a job to a cleaner directly from their profile and confirm the assignment."
+          },
+          {
+            "id": 4,
+            "title": "Payment Management & Webhook Integration",
+            "description": "Implement a payment management section to view all transactions and integrate with payment gateway webhooks for status updates.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Develop a payment management section within the admin dashboard. Display a list of all payments from the `payments` table, linked to their respective bookings and customers. Include details such as amount, status (e.g., pending, successful, failed, refunded), payment method, and transaction date. Implement a secure API endpoint (e.g., `/api/webhooks/payment`) to receive and verify payment gateway webhooks (e.g., Stripe, PayPal). This endpoint should parse webhook payloads and securely update payment statuses and related booking information in the database.\n<info added on 2025-09-10T00:55:45.800Z>\n---\n**Implementation Update**\n\nThe payment management system and webhook integration have been successfully implemented.\n\n**1. Secure Webhook Endpoint:**\n- A new API route has been created at `/api/webhooks/payment/route.ts` to handle incoming webhook events from the payment gateway.\n- The endpoint secures payloads by verifying the incoming signature (e.g., `x-paystack-signature`) against a secret stored in environment variables (`process.env.PAYSTACK_SECRET_KEY`) using the `crypto` module.\n- A `switch` statement within the `POST` handler processes various event types, including:\n    - `charge.success`: Updates payment status to 'successful' and confirms the associated booking.\n    - `charge.failed`: Updates payment status to 'failed'.\n    - `refund.processed`: Updates payment status to 'refunded' and updates the booking accordingly.\n    - `chargeback` events: Updates payment status and flags the booking for review.\n- All database operations are handled via the Supabase client, ensuring atomic updates to the `payments` and `bookings` tables.\n\n**2. Enhanced Admin Payments UI:**\n- The admin payments page (likely `app/admin/payments/page.tsx`) has been updated with new components for webhook management.\n- A real-time webhook health indicator (`<Badge>`) has been added to show the connection status (Online/Offline/Error).\n- Admin-facing action buttons (`<Button>`) have been implemented:\n    - **\"Test Webhook\"**: Triggers a server action to send a mock payload to the webhook endpoint for testing the entire flow.\n    - **\"Check Status\"**: Manually queries the payment gateway API to verify a transaction's current status.\n\n**3. Logging and Security:**\n- Comprehensive logging has been added to the webhook handler to record incoming events, successful updates, and processing errors for easier debugging.\n- Failure reasons from webhook payloads are now stored in the `payments` table to provide context for failed transactions.\n</info added on 2025-09-10T00:55:45.800Z>",
+            "status": "done",
+            "testStrategy": "Verify all payments are correctly listed with accurate details and links to associated bookings/customers. Simulate various payment webhook events (e.g., successful payment, refund, chargeback) and verify that the payment status in the database is updated correctly and securely. Ensure webhook verification prevents unauthorized updates."
+          },
+          {
+            "id": 5,
+            "title": "Operational Analytics Dashboard",
+            "description": "Build an analytics section to visualize key operational metrics for bookings, revenue, and cleaner performance.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Develop an analytics section within the admin dashboard to provide insights into business operations. Implement data aggregation queries to calculate key metrics such as total bookings over time (daily, weekly, monthly trends), monthly/quarterly revenue, average booking value, and most popular services. Integrate a charting library (e.g., Chart.js, Recharts) to visualize these metrics effectively with interactive charts and graphs. Display cleaner performance metrics like average rating, number of completed jobs, and total earnings.\n<info added on 2025-09-10T00:56:53.662Z>\n**UPDATE:** A review of the codebase, specifically `app/admin/analytics/page.tsx`, confirms that this feature is already fully implemented. The existing dashboard provides a comprehensive set of operational analytics, aligning with the project's use of `shadcn/ui` and server-side data fetching.\n\n**Key Implemented Features:**\n- **Core Metrics:** Displays total revenue, total bookings, active customers, and active cleaners with trend indicators.\n- **Time-Based Analysis:** Includes a dynamic time range filter (e.g., 7d, 30d, 90d, 1y) that updates all displayed metrics and charts.\n- **Revenue & Booking Trends:** Visualizes revenue and booking data over time using interactive charts.\n- **Performance Analytics:** Calculates and displays key performance indicators such as completion rate and average booking value.\n- **Top Services:** A breakdown of the most popular services by booking count.\n- **UI & UX:** The interface is built using `shadcn/ui` components, is fully responsive, and includes appropriate loading and empty states.\n\nThe implementation leverages efficient data aggregation queries to fetch and process analytics data from the database. The feature is considered complete and meets all initial requirements.\n</info added on 2025-09-10T00:56:53.662Z>",
+            "status": "done",
+            "testStrategy": "Verify the accuracy of all displayed analytics data by cross-referencing with raw database queries. Test chart rendering and responsiveness across different screen sizes. Ensure performance metrics for cleaners are correctly calculated and displayed based on their completed jobs and ratings."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Real-time Notifications and Status Updates",
+        "description": "Implement real-time notifications for booking status changes and cleaner assignments.",
+        "details": "Set up Supabase real-time subscriptions, implement real-time notifications for booking status changes, cleaner assignments, and payment confirmations, create notification management system, and add push notification support.",
+        "status": "done",
+        "priority": "low",
+        "dependencies": [
+          "12"
+        ],
+        "testStrategy": "Test real-time updates with multiple users, verify notification delivery, and test notification management features.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Supabase Real-time Client and Generic Channel Listener",
+            "description": "Configure the Supabase client to enable real-time subscriptions. Create a generic real-time channel to listen for changes on the 'notifications' table, logging incoming events to the console for initial verification.",
+            "dependencies": [],
+            "details": "Leverage the existing Supabase client setup (e.g., `src/lib/supabase/client.ts`). Initialize a new Supabase real-time client instance. Create a channel (e.g., 'public:notifications') and subscribe to `postgres_changes` events on the `notifications` table. Implement a basic client-side listener to confirm real-time data flow.\n<info added on 2025-09-10T01:00:00.654Z>\n[\n  0\n]\n</info added on 2025-09-10T01:00:00.654Z>",
+            "status": "done",
+            "testStrategy": "Verify that the Supabase real-time client connects successfully. Manually insert/update a record in the `notifications` table via Supabase Studio and confirm that the client-side listener logs the change event."
+          },
+          {
+            "id": 2,
+            "title": "Implement Supabase Database Triggers for Notification Generation",
+            "description": "Create database triggers or functions within Supabase to automatically insert new records into the `notifications` table whenever relevant changes occur in `bookings` (status changes), `booking_assignments` (new assignments), and `payments` (confirmation).",
+            "dependencies": [],
+            "details": "Define PostgreSQL triggers on the `bookings` table (for `status` updates), `booking_assignments` table (for new assignments), and `payments` table (for `status` or `confirmed_at` updates). These triggers should call a PL/pgSQL function that constructs and inserts a new row into the `notifications` table, including `user_id`, `type`, `message`, and relevant foreign keys.\n<info added on 2025-09-10T01:03:16.324Z>\n**Implementation Summary:**\n\nA new database migration, `supabase/migrations/20241210_create_notification_triggers.sql`, was created to implement the notification logic. This migration also added a `read` boolean column to the `notifications` table to track read status.\n\nThe core logic is encapsulated in a central PL/pgSQL function, `generate_notification()`, which is called by specific trigger functions:\n- `notify_booking_status_change()`: Triggered on the `bookings` table for status updates.\n- `notify_cleaner_assignment()`: Triggered on the `booking_assignments` table for new assignments.\n- `notify_payment_status_change()`: Triggered on the `payments` table for status updates.\n\nNotifications are generated for both customers and cleaners, depending on the event. The following notification `type` values are now being inserted into the `notifications` table:\n- **Booking:** `booking_confirmed`, `booking_started`, `booking_completed`, `booking_cancelled`\n- **Assignment:** `cleaner_assigned` (for customer), `new_booking_assigned` (for cleaner)\n- **Payment:** `payment_successful`, `payment_failed`, `payment_refunded`\n\nA complete testing infrastructure was also established:\n- A SQL function `test_notification_triggers()` was created for backend testing.\n- A new API endpoint at `src/app/api/test-notifications/route.ts` allows triggering the test function via a POST request.\n- The `src/app/test-realtime/page.tsx` was updated with a \"Test Triggers\" button to invoke this API and verify notification generation.\n</info added on 2025-09-10T01:03:16.324Z>",
+            "status": "done",
+            "testStrategy": "Perform a booking status update, assign a cleaner to a booking, and simulate a payment confirmation. Verify that corresponding entries are automatically created in the `notifications` table with correct data and associated `user_id`."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Real-time Notifications with Frontend UI using shadcn/ui Toasts",
+            "description": "Connect the real-time listener to the application's UI. Display incoming real-time notifications as transient toast messages using `shadcn/ui`'s Toast component, ensuring notifications are filtered and displayed only to the relevant user.",
+            "dependencies": [
+              "13.1",
+              "13.2"
+            ],
+            "details": "Enhance the real-time listener from Subtask 1 to parse the incoming `notifications` table changes. Implement logic to check if the notification's `user_id` matches the currently logged-in user. If so, use `shadcn/ui`'s `useToast` hook to display a new toast notification with the relevant message and type. Ensure proper error handling and UI feedback.\n<info added on 2025-09-10T01:08:59.209Z>\n**Implementation Summary:**\n\nA new custom hook, `useRealtimeNotificationsWithToast`, has been created in `src/hooks/useRealtimeNotificationsWithToast.ts`. This hook encapsulates the real-time notification logic:\n\n- It establishes a subscription to the `public:notifications` table via a Supabase channel within a `useEffect` hook, ensuring proper subscription and cleanup.\n- It filters incoming notification payloads by comparing the `user_id` on the notification record with the ID of the currently authenticated user.\n- Upon receiving a relevant notification, it invokes the `toast()` function from the `src/hooks/use-toast.ts` hook.\n- A mapping logic is implemented to translate the notification `type` (e.g., `BOOKING_CONFIRMED`, `PAYMENT_FAILED`) into a corresponding toast variant (`success`, `destructive`, `warning`) and a user-friendly message for the title and description.\n\nTo render the toasts, the `<Toaster />` component from `src/components/ui/toaster.tsx` has been integrated into the root layout at `src/app/layout.tsx`, making the toast system globally available. The new hook is currently being called on the `src/app/test-realtime/page.tsx` for demonstration and testing.\n</info added on 2025-09-10T01:08:59.209Z>",
+            "status": "done",
+            "testStrategy": "Log in as a customer and trigger a booking status change for their booking. Verify that a toast notification appears on their screen. Log in as a cleaner and get assigned to a booking. Verify a toast notification appears. Ensure notifications for other users are not displayed."
+          },
+          {
+            "id": 4,
+            "title": "Develop Notification Management System and Unread Count Display",
+            "description": "Create a dedicated UI component (e.g., a dropdown or a separate page) to list all notifications for the logged-in user. Implement functionality to mark notifications as read and display an unread notification count.",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "Design a notification list component using `shadcn/ui` components (e.g., `Popover`, `Sheet`, `ScrollArea`, `Button`). Fetch all notifications for the current user from the `notifications` table, ordered by `created_at`. Implement an API endpoint or Supabase function to update the `read` status of a notification. Display a badge or icon with the count of unread notifications in the header/navbar.\n<info added on 2025-09-10T01:18:23.961Z>\n**Implementation Summary:**\n\nA complete notification management system has been developed, providing both a quick-access dropdown and a dedicated page for users.\n\n- **Notification Dropdown Component:**\n  - A new component, `src/components/notifications/notification-dropdown.tsx`, was created using `shadcn/ui`'s `Popover` for the dropdown, `ScrollArea` for the list, and `Badge` for the unread count.\n  - This component has been integrated into the main site navigation in `src/components/layout/header.tsx`, positioned next to the user avatar.\n  - It displays the count of unread notifications and provides functionality to mark individual or all notifications as read directly from the dropdown.\n\n- **Dedicated Notifications Page:**\n  - A full-featured notifications page was created at `src/app/notifications/page.tsx`.\n  - This page offers a comprehensive view of all user notifications, with options to filter between \"All\" and \"Unread\".\n  - It includes bulk actions like \"Mark all as read\" and displays detailed information for each notification, including timestamps.\n\n- **Core Functionality & Integration:**\n  - Both the dropdown and the dedicated page leverage the existing real-time hook (from subtask 13.3) to receive and display notifications instantly.\n  - Backend logic to update the `read` status in the `notifications` table for single or multiple entries has been implemented.\n  - For improved UX, notifications are color-coded based on their type (e.g., success, warning, error).\n</info added on 2025-09-10T01:18:23.961Z>",
+            "status": "done",
+            "testStrategy": "Verify that all notifications for the logged-in user are displayed correctly in the list. Click on a notification or a 'Mark All As Read' button and confirm its `read` status updates in the database and the unread count decreases. Log out and log back in to ensure read status persists."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Push Notification Service for Critical Updates",
+            "description": "Research and integrate a suitable push notification service (e.g., OneSignal, Firebase Cloud Messaging, or Supabase's native push capabilities if available) to send push notifications to user devices for critical real-time events like new cleaner assignments or urgent booking status changes.",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "Select a push notification service and set up its SDK/API. Implement server-side logic (e.g., Supabase Edge Function or a backend service) that listens for specific critical `notifications` table inserts/updates (e.g., `type = 'cleaner_assigned'`). When a critical event occurs, trigger a push notification to the relevant user's registered device token. Implement client-side registration for push tokens.\n<info added on 2025-09-10T01:26:42.143Z>\n**Implementation Update:**\n\nThe integration was completed using the standard Web Push API and the `web-push` library, rather than a third-party service.\n\n- **Database & Backend:** A new `push_subscriptions` table was created via migration (`supabase/migrations/20241210_create_push_subscriptions_table.sql`) to store user device subscription details, protected by RLS policies. Existing database triggers were updated to use `pg_notify` for critical events. This mechanism triggers a new API endpoint at `src/app/api/push-notifications/listen/route.ts`, which filters events and uses `src/app/api/push-notifications/send/route.ts` to dispatch notifications to the user's registered devices.\n\n- **Client-Side & UI:**\n  - A service worker was created at `public/sw.js` to handle incoming push events in the background.\n  - Client-side logic for registration, subscription management, and a React hook are centralized in `src/lib/push-notifications.ts`.\n  - A new UI component, `src/components/notifications/push-notification-settings.tsx`, allows users to toggle and test push notifications. This component has been integrated into the main user profile page at `src/app/profile/page.tsx`.\n</info added on 2025-09-10T01:26:42.143Z>",
+            "status": "done",
+            "testStrategy": "Register a device for push notifications. Trigger a critical event (e.g., assign a cleaner to a booking). Verify that a push notification is received on the registered device. Test with different device types (if applicable) and ensure notification content is accurate."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Performance Optimization and Core Web Vitals",
+        "description": "Optimize application performance to meet Core Web Vitals targets (LCP ≤ 2.5s, CLS ≤ 0.1, INP ≤ 200ms).",
+        "details": "Implement image optimization, lazy loading, code splitting, caching strategies, bundle optimization, and performance monitoring. Ensure Core Web Vitals are in 'Good' range.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "13"
+        ],
+        "testStrategy": "Run Lighthouse audits, test Core Web Vitals, verify performance improvements, and test on various devices and network conditions.",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Accessibility and WCAG 2.1 AA Compliance",
+        "description": "Ensure the application meets WCAG 2.1 AA accessibility standards for inclusive user experience.",
+        "details": "Implement proper ARIA labels, keyboard navigation, screen reader support, color contrast compliance, focus management, and accessibility testing with automated tools.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "14"
+        ],
+        "testStrategy": "Run accessibility audits, test with screen readers, verify keyboard navigation, and ensure WCAG 2.1 AA compliance.",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "End-to-End Testing with Playwright",
+        "description": "Implement comprehensive E2E testing suite using Playwright for critical user flows.",
+        "details": "Set up Playwright testing framework, create E2E tests for booking flow, payment processing, user authentication, admin operations, and cleaner workflows. Implement automated testing in CI/CD pipeline.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "15"
+        ],
+        "testStrategy": "Run E2E test suite, verify test coverage, test CI/CD integration, and ensure tests catch regressions.",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Database Security and RLS Testing",
+        "description": "Implement comprehensive testing for Row Level Security policies and database security.",
+        "details": "Create unit tests for RLS policies, test data access controls for different user roles, implement database constraint testing, and verify data integrity across all operations.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "16"
+        ],
+        "testStrategy": "Run RLS unit tests, verify security policies, test data access controls, and ensure no unauthorized data access.",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Monitoring and Analytics Setup",
+        "description": "Implement comprehensive monitoring with Sentry, GA4/GTM, and custom analytics tracking.",
+        "details": "Set up Sentry for error tracking and performance monitoring, implement GA4/GTM for user analytics, create custom event tracking (start_booking, add_extra, payment_success), and add health check endpoints.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "17"
+        ],
+        "testStrategy": "Test error tracking, verify analytics data collection, test health checks, and ensure monitoring alerts work correctly.",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Production Deployment and CI/CD Pipeline",
+        "description": "Set up production deployment on Vercel with GitHub Actions CI/CD pipeline.",
+        "details": "Configure Vercel deployment, set up GitHub Actions for automated testing and deployment, implement preview deployments for PRs, configure environment variables, and set up production monitoring.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "18"
+        ],
+        "testStrategy": "Test deployment pipeline, verify preview deployments, test production deployment, and ensure CI/CD runs successfully on PRs (preview in < 5min).",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Final Testing and Launch Preparation",
+        "description": "Conduct final comprehensive testing and prepare for production launch.",
+        "details": "Perform full system testing, user acceptance testing, security audit, performance testing, and create launch checklist. Ensure all success criteria are met: booking completion rate ≥ 60%, payment success rate ≥ 95%, Core Web Vitals in 'Good' range.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "19"
+        ],
+        "testStrategy": "Conduct comprehensive testing, verify all success criteria, perform security audit, and complete launch preparation checklist.",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-09T17:40:28.188Z",
+      "updated": "2025-09-10T01:26:46.130Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

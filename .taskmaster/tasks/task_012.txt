@@ -1,0 +1,11 @@
+# Task ID: 12
+# Title: Admin Dashboard for Operations Management
+# Status: pending
+# Dependencies: 11
+# Priority: medium
+# Description: Create comprehensive admin dashboard for managing all aspects of the cleaning service operation.
+# Details:
+Build admin dashboard with booking management (view all, filter, assign cleaners, cancel/update), cleaner management (activate, deactivate, assign jobs, monitor ratings), payment management with webhook verification, and analytics dashboard (bookings, revenue, performance metrics).
+
+# Test Strategy:
+Test admin dashboard functionality, verify data accuracy, test management operations, and ensure proper admin-only access controls.

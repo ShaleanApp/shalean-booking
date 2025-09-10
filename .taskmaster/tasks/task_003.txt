@@ -1,0 +1,11 @@
+# Task ID: 3
+# Title: Authentication System with Role-Based Access
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Implement Supabase Auth with role-based access control for customers, cleaners, and admins.
+# Details:
+Set up Supabase Auth, create login/register forms, implement role-based routing and middleware, create profile management system, and add protected route guards for different user types.
+
+# Test Strategy:
+Test user registration, login, logout, role-based access, and verify that protected routes work correctly for customers, cleaners, and admins.

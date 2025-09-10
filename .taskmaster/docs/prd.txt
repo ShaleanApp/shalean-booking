@@ -1,0 +1,94 @@
+# Product Requirements Document (PRD) – Shalean Cleaning Services Web App
+
+## 1. Objective
+Build a responsive, SEO-friendly cleaning services web application for Shalean Cleaning Services. The app should allow customers to book services online, cleaners to manage assigned jobs, and admins to manage the entire operation. Ensure alignment between database schema, user flows, and SEO best practices.
+
+## 2. Key Features
+
+### 2.1 Customer Experience
+- Landing page with SEO optimization (structured data, sitemap, robots.txt)
+- Service selection (categories, items, extras, pricing)
+- Multi-step booking form: service → details → schedule → address → review → payment
+- Support for guest booking with draft persistence
+- Online payments via Paystack (inline checkout + webhook reconciliation)
+- Booking confirmation emails & reminders (Resend/Postmark)
+- Customer dashboard: bookings, payments, profile, saved addresses
+
+### 2.2 Cleaner Experience
+- Login/authentication
+- Dashboard with assigned jobs (date, time, address, customer info)
+- Update booking status: On My Way → Arrived → Completed
+- Track earnings and job history
+
+### 2.3 Admin Experience
+- Manage services (CRUD categories, items, extras)
+- Manage bookings (view all, filter, assign cleaners, cancel/update)
+- Manage cleaners (activate, deactivate, assign jobs, monitor ratings)
+- Manage payments & refunds with webhook verification
+- Analytics dashboard (bookings, revenue, performance)
+
+## 3. Technical Requirements
+- Frontend: Next.js 15 (App Router), TypeScript, TailwindCSS, shadcn/ui
+- Backend: Supabase (Postgres, Auth, RLS, Storage, Edge Functions)
+- Payments: Paystack inline checkout + webhook handler
+- Emails: Resend or Postmark for transactional notifications (with SPF/DKIM setup)
+- CI/CD: GitHub Actions + Vercel for deploys
+- Monitoring: Sentry + GA4/GTM
+- Testing: Playwright E2E, RLS unit tests
+
+## 4. Database Schema (Initial)
+- **profiles** (id, user_id UNIQUE, role, name, phone, avatar_url, created_at, updated_at)
+- **service_categories** (id, name, slug UNIQUE, description, active)
+- **service_items** (id, category_id, name, slug UNIQUE, description, base_price, active)
+- **extras** (id, service_item_id, name, slug UNIQUE, price, active)
+- **addresses** (id, user_id, label, street, suburb, city, postal_code, notes, created_at)
+- **bookings** (id, customer_id, service_item_id, address_id, status ENUM, scheduled_at timestamptz, total_price numeric(10,2), created_at, updated_at)
+- **booking_items** (id, booking_id, item_type ENUM, ref_id, qty, unit_price, line_total)
+- **cleaners** (id, profile_id UNIQUE, active, rating numeric(3,2), jobs_completed int, created_at)
+- **booking_assignments** (id, booking_id, cleaner_id, status ENUM, assigned_by, assigned_at, accepted_at)
+- **payments** (id, booking_id, user_id, provider, reference UNIQUE, amount numeric(10,2), currency, status ENUM, gateway_raw jsonb, webhook_received_at, created_at)
+- **notifications** (id, user_id, channel, type, payload jsonb, status, sent_at, read_at, created_at)
+
+## 5. User Roles & Permissions
+
+### Customer
+- Can create/manage their own bookings
+- Can view and pay for bookings
+- Can update profile and saved addresses
+
+### Cleaner
+- Can only view assigned bookings via booking_assignments
+- Can update booking status (accepted, on my way, arrived, completed)
+- Can view earnings and job history
+
+### Admin
+- Full CRUD access to all tables
+- Manage services, bookings, cleaners, payments
+- Bypass RLS policies via service role
+
+## 6. Phased Implementation Plan
+- Phase 0: Project setup & configuration (GitHub, Vercel, Supabase)
+- Phase 1: Database schema & authentication (Supabase RLS, profiles)
+- Phase 2: Shared UI system & typed data access
+- Phase 3: Booking flow (multi-step form, guest draft + authed persistence)
+- Phase 4: Payment integration (Paystack inline + webhook reconciliation)
+- Phase 5: Dashboards (customer, cleaner, admin)
+- Phase 6: SEO, performance, accessibility, testing (Playwright, Lighthouse)
+- Phase 7: Deployment & monitoring (Sentry, GA4/GTM, health checks)
+
+## 7. Success Criteria
+- Customer can book, pay, and receive email confirmation
+- Cleaner can see jobs & update status
+- Admin can manage services, bookings, cleaners, payments
+- Booking completion rate ≥ 60%
+- Payment success rate ≥ 95%
+- Core Web Vitals in 'Good' range (LCP ≤ 2.5s, CLS ≤ 0.1, INP ≤ 200ms)
+- CI/CD pipeline runs successfully on PRs (preview in < 5min)
+- Monitoring and analytics capture key events (start_booking, add_extra, payment_success)
+
+## 8. Risks & Mitigations
+- Payment failures → Mitigation: webhook retries + idempotency keys
+- SEO underperformance → Mitigation: structured data, regular audits
+- Cleaner no-shows → Mitigation: notifications + reassignment flow
+- Data inconsistency → Mitigation: DB constraints + tests
+- Scalability issues → Mitigation: Supabase/Postgres tuning + caching where needed

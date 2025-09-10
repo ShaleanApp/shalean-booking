@@ -1,0 +1,11 @@
+# Task ID: 14
+# Title: Performance Optimization and Core Web Vitals
+# Status: pending
+# Dependencies: 13
+# Priority: medium
+# Description: Optimize application performance to meet Core Web Vitals targets (LCP ≤ 2.5s, CLS ≤ 0.1, INP ≤ 200ms).
+# Details:
+Implement image optimization, lazy loading, code splitting, caching strategies, bundle optimization, and performance monitoring. Ensure Core Web Vitals are in 'Good' range.
+
+# Test Strategy:
+Run Lighthouse audits, test Core Web Vitals, verify performance improvements, and test on various devices and network conditions.

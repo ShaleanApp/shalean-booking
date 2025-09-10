@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Supabase Database Schema Implementation
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Create and implement the complete database schema for Shalean Cleaning Services with all 9 tables and relationships.
+# Details:
+Set up Supabase project, create tables: profiles, service_categories, service_items, extras, addresses, bookings, booking_items, cleaners, booking_assignments, payments, notifications. Implement Row Level Security (RLS) policies for all tables based on user roles (customer, cleaner, admin).
+
+# Test Strategy:
+Test database connections, verify all tables are created correctly, validate RLS policies work for different user roles, and test data relationships.

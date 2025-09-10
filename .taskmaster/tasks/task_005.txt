@@ -1,0 +1,11 @@
+# Task ID: 5
+# Title: Service Management System (Admin)
+# Status: pending
+# Dependencies: 4
+# Priority: medium
+# Description: Create admin interface for managing service categories, items, and extras with full CRUD operations.
+# Details:
+Build admin dashboard for service management, create forms for adding/editing service categories, service items, and extras, implement pricing management, and add service activation/deactivation functionality.
+
+# Test Strategy:
+Test CRUD operations for services, verify pricing calculations, and ensure admin-only access is properly enforced.

@@ -1,0 +1,11 @@
+# Task ID: 16
+# Title: End-to-End Testing with Playwright
+# Status: pending
+# Dependencies: 15
+# Priority: medium
+# Description: Implement comprehensive E2E testing suite using Playwright for critical user flows.
+# Details:
+Set up Playwright testing framework, create E2E tests for booking flow, payment processing, user authentication, admin operations, and cleaner workflows. Implement automated testing in CI/CD pipeline.
+
+# Test Strategy:
+Run E2E test suite, verify test coverage, test CI/CD integration, and ensure tests catch regressions.

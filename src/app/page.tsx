@@ -1,103 +1,405 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Star, Users, Shield, Clock, Sparkles } from "lucide-react";
+import Script from "next/script";
+import { ServiceBrowser } from "@/components/services/ServiceBrowser";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://shaleancleaning.com/#organization",
+        "name": "Shalean Cleaning Services",
+        "alternateName": "Shalean Cleaning",
+        "url": "https://shaleancleaning.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://shaleancleaning.com/logo.png",
+          "width": 200,
+          "height": 200
+        },
+        "image": "https://shaleancleaning.com/og-image.jpg",
+        "description": "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",
+        "telephone": "+1-555-123-4567",
+        "email": "info@shaleancleaning.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "123 Main St",
+          "addressLocality": "City",
+          "addressRegion": "State",
+          "postalCode": "12345",
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "40.7128",
+          "longitude": "-74.0060"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "08:00",
+            "closes": "18:00"
+          }
+        ],
+        "priceRange": "$$",
+        "paymentAccepted": ["Cash", "Credit Card", "Check"],
+        "currenciesAccepted": "USD",
+        "areaServed": {
+          "@type": "City",
+          "name": "City, State"
+        },
+        "serviceArea": {
+          "@type": "GeoCircle",
+          "geoMidpoint": {
+            "@type": "GeoCoordinates",
+            "latitude": "40.7128",
+            "longitude": "-74.0060"
+          },
+          "geoRadius": "50000"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Cleaning Services",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Residential Cleaning",
+                "description": "Regular home cleaning services including living areas, kitchen, bathrooms, and bedrooms",
+                "provider": {
+                  "@id": "https://shaleancleaning.com/#organization"
+                }
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Deep Cleaning",
+                "description": "Thorough cleaning for special occasions including inside appliances, baseboards, and light fixtures",
+                "provider": {
+                  "@id": "https://shaleancleaning.com/#organization"
+                }
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Move-in/Move-out Cleaning",
+                "description": "Cleaning for transitions including empty property cleaning, cabinet interiors, and window cleaning",
+                "provider": {
+                  "@id": "https://shaleancleaning.com/#organization"
+                }
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Commercial Cleaning",
+                "description": "Office and business cleaning including office spaces, restrooms, and common areas",
+                "provider": {
+                  "@id": "https://shaleancleaning.com/#organization"
+                }
+              }
+            }
+          ]
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "150",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "review": [
+          {
+            "@type": "Review",
+            "author": {
+              "@type": "Person",
+              "name": "Sarah Johnson"
+            },
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5",
+              "bestRating": "5"
+            },
+            "reviewBody": "Excellent service! The team was professional, thorough, and respectful. My home has never looked better."
+          },
+          {
+            "@type": "Review",
+            "author": {
+              "@type": "Person",
+              "name": "Michael Chen"
+            },
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5",
+              "bestRating": "5"
+            },
+            "reviewBody": "Reliable, trustworthy, and always on time. I've been using their services for over a year and couldn't be happier."
+          },
+          {
+            "@type": "Review",
+            "author": {
+              "@type": "Person",
+              "name": "Emily Rodriguez"
+            },
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5",
+              "bestRating": "5"
+            },
+            "reviewBody": "The move-out cleaning was perfect. They made sure every detail was covered and I got my full security deposit back."
+          }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://shaleancleaning.com/#website",
+        "url": "https://shaleancleaning.com",
+        "name": "Shalean Cleaning Services",
+        "description": "Professional cleaning services for your home and office",
+        "publisher": {
+          "@id": "https://shaleancleaning.com/#organization"
+        },
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://shaleancleaning.com/search?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://shaleancleaning.com/#webpage",
+        "url": "https://shaleancleaning.com",
+        "name": "Shalean Cleaning Services - Professional Home & Office Cleaning",
+        "isPartOf": {
+          "@id": "https://shaleancleaning.com/#website"
+        },
+        "about": {
+          "@id": "https://shaleancleaning.com/#organization"
+        },
+        "description": "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://shaleancleaning.com"
+            }
+          ]
+        }
+      }
+    ]
+  };
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <>
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
+      />
+      <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge variant="secondary" className="mb-4">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Professional Cleaning Services
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              Clean Homes,{" "}
+              <span className="text-blue-600 dark:text-blue-400">Happy Lives</span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              Professional cleaning services for your home and office. 
+              Book online, get reliable service, and enjoy a spotless space.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="text-lg px-8 py-6">
+                <Link href="/book">Book Now</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
+                <Link href="/services">View Services</Link>
+              </Button>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Why Choose Shalean Cleaning?
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              We provide exceptional cleaning services with a focus on quality, reliability, and customer satisfaction.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle>Insured & Bonded</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Fully insured and bonded for your peace of mind. Your property and belongings are protected.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+                <CardTitle>Professional Team</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Experienced, trained, and background-checked professionals who take pride in their work.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
+                <CardTitle>Flexible Scheduling</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Book one-time or recurring services that fit your schedule. Available 7 days a week.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Preview */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Our Services
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Comprehensive cleaning solutions for every need
+            </p>
+          </div>
+          
+          <ServiceBrowser maxItems={8} />
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              What Our Customers Say
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Don't just take our word for it - hear from our satisfied customers
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  "Excellent service! The team was professional, thorough, and respectful. 
+                  My home has never looked better."
+                </p>
+                <div className="font-semibold">Sarah Johnson</div>
+                <div className="text-sm text-gray-500">Regular Customer</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  "Reliable, trustworthy, and always on time. I've been using their services 
+                  for over a year and couldn't be happier."
+                </p>
+                <div className="font-semibold">Michael Chen</div>
+                <div className="text-sm text-gray-500">Office Manager</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  "The move-out cleaning was perfect. They made sure every detail was covered 
+                  and I got my full security deposit back."
+                </p>
+                <div className="font-semibold">Emily Rodriguez</div>
+                <div className="text-sm text-gray-500">Recent Move</div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-blue-600 dark:bg-blue-700">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Ready to Experience Clean?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Book your cleaning service today and enjoy a spotless home or office.
+          </p>
+          <Button asChild size="lg" variant="secondary" className="text-lg px-8 py-6">
+            <Link href="/book">Get Started Now</Link>
+          </Button>
+        </div>
+      </section>
+      </div>
+    </>
   );
 }

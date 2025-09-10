@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Shared UI System with shadcn/ui Components
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Set up the shared UI component system using shadcn/ui and create reusable components for the cleaning services app.
+# Details:
+Install and configure shadcn/ui, create custom theme for Shalean Cleaning Services, build reusable components (buttons, forms, cards, modals), and establish consistent design system with TailwindCSS.
+
+# Test Strategy:
+Test component rendering, verify design consistency, and ensure all components work across different screen sizes.

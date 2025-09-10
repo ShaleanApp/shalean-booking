@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: Real-time Notifications and Status Updates
+# Status: pending
+# Dependencies: 12
+# Priority: low
+# Description: Implement real-time notifications for booking status changes and cleaner assignments.
+# Details:
+Set up Supabase real-time subscriptions, implement real-time notifications for booking status changes, cleaner assignments, and payment confirmations, create notification management system, and add push notification support.
+
+# Test Strategy:
+Test real-time updates with multiple users, verify notification delivery, and test notification management features.

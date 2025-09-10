@@ -1,0 +1,11 @@
+# Task ID: 15
+# Title: Accessibility and WCAG 2.1 AA Compliance
+# Status: pending
+# Dependencies: 14
+# Priority: medium
+# Description: Ensure the application meets WCAG 2.1 AA accessibility standards for inclusive user experience.
+# Details:
+Implement proper ARIA labels, keyboard navigation, screen reader support, color contrast compliance, focus management, and accessibility testing with automated tools.
+
+# Test Strategy:
+Run accessibility audits, test with screen readers, verify keyboard navigation, and ensure WCAG 2.1 AA compliance.

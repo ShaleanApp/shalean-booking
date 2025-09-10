@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://shaleancleaning.com/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /cleaner/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /auth/
+
+# Allow public pages
+Allow: /
+Allow: /services
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /book
+
