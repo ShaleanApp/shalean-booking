@@ -61,7 +61,10 @@ export default function ServiceExtrasPage() {
 
   const handleCreateExtra = async (data: Omit<ServiceExtra, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      await createExtra.mutateAsync(data)
+      await createExtra.mutateAsync({
+        ...data,
+        description: data.description || undefined
+      })
       setIsFormOpen(false)
     } catch (error) {
       console.error('Error creating extra:', error)
@@ -72,7 +75,13 @@ export default function ServiceExtrasPage() {
     if (!editingExtra) return
     
     try {
-      await updateExtra.mutateAsync({ id: editingExtra.id, data })
+      await updateExtra.mutateAsync({ 
+        id: editingExtra.id, 
+        data: {
+          ...data,
+          description: data.description || undefined
+        }
+      })
       setEditingExtra(null)
     } catch (error) {
       console.error('Error updating extra:', error)

@@ -8,6 +8,11 @@ import { useBooking } from '@/contexts/BookingContext'
 import { ServiceCategory, ServiceItem, ServiceExtra } from '@/types'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Minus, Check } from 'lucide-react'
+import { formatServicePrice, formatExtraPrice, formatTotalAmount } from '@/lib/currency'
+import { LoadingState, RetryButton } from '@/components/shared/LoadingState'
+import { useToast } from '@/components/shared/Toast'
+import { safeApiCall, createErrorHandler } from '@/lib/error-handling'
+import { cachedApiCall, CACHE_KEYS, invalidateServiceCache } from '@/lib/cache'
 
 export function ServiceSelectionStep() {
   const { state, updateFormData } = useBooking()
@@ -17,75 +22,123 @@ export function ServiceSelectionStep() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [retrying, setRetrying] = useState(false)
+  
+  const toast = useToast()
+  const errorHandler = createErrorHandler()
 
   // Fetch data on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Check if environment variables are set
-        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-          throw new Error('Supabase environment variables are not configured. Please check your .env.local file.')
-        }
-
-        const supabase = createClient()
-        
-        // Fetch categories
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('service_categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order')
-
-        if (categoriesError) {
-          console.error('Error fetching categories:', categoriesError)
-          throw new Error(`Failed to fetch categories: ${categoriesError.message}`)
-        }
-
-        // Fetch services
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('service_items')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at')
-
-        if (servicesError) {
-          console.error('Error fetching services:', servicesError)
-          throw new Error(`Failed to fetch services: ${servicesError.message}`)
-        }
-
-        // Fetch extras
-        const { data: extrasData, error: extrasError } = await supabase
-          .from('service_extras')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at')
-
-        if (extrasError) {
-          console.error('Error fetching extras:', extrasError)
-          throw new Error(`Failed to fetch extras: ${extrasError.message}`)
-        }
-
-        setCategories(categoriesData || [])
-        setServices(servicesData || [])
-        setExtras(extrasData || [])
-        
-        if (categoriesData && categoriesData.length > 0) {
-          setSelectedCategory(categoriesData[0].id)
-        }
-      } catch (error) {
-        console.error('Error fetching services:', error)
-        // Set empty arrays to prevent further errors
-        setCategories([])
-        setServices([])
-        setExtras([])
-        setError(error instanceof Error ? error.message : 'An unknown error occurred')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchData()
   }, [])
+
+  const fetchData = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Check if environment variables are set
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase environment variables are not configured. Please check your .env.local file.')
+      }
+
+      const supabase = createClient()
+      
+      // Fetch categories with caching
+      const categoriesData = await cachedApiCall(
+        CACHE_KEYS.SERVICE_CATEGORIES,
+        async () => {
+          const result = await safeApiCall(async () => {
+            const { data, error } = await supabase
+              .from('service_categories')
+              .select('*')
+              .eq('is_active', true)
+              .order('sort_order')
+            
+            if (error) throw error
+            return data
+          })
+
+          if (!result.success) {
+            throw new Error(result.error?.message || 'Failed to fetch categories')
+          }
+
+          return result.data
+        },
+        { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+      )
+
+      // Fetch services with caching
+      const servicesData = await cachedApiCall(
+        CACHE_KEYS.SERVICE_ITEMS(),
+        async () => {
+          const result = await safeApiCall(async () => {
+            const { data, error } = await supabase
+              .from('service_items')
+              .select('*')
+              .eq('is_active', true)
+              .order('created_at')
+
+            if (error) throw error
+            return data
+          })
+
+          if (!result.success) {
+            throw new Error(result.error?.message || 'Failed to fetch services')
+          }
+
+          return result.data
+        },
+        { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+      )
+
+      // Fetch extras with caching
+      const extrasData = await cachedApiCall(
+        CACHE_KEYS.SERVICE_EXTRAS,
+        async () => {
+          const result = await safeApiCall(async () => {
+            const { data, error } = await supabase
+              .from('service_extras')
+              .select('*')
+              .eq('is_active', true)
+              .order('created_at')
+            
+            if (error) throw error
+            return data
+          })
+
+          if (!result.success) {
+            throw new Error(result.error?.message || 'Failed to fetch extras')
+          }
+
+          return result.data
+        },
+        { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+      )
+
+      setCategories(categoriesData || [])
+      setServices(servicesData || [])
+      setExtras(extrasData || [])
+      
+      if (categoriesData && categoriesData.length > 0) {
+        setSelectedCategory(categoriesData[0].id)
+      }
+
+      toast.success('Services loaded successfully')
+    } catch (error) {
+      const errorMessage = errorHandler.handleError(error, 'Service Selection')
+      setError(errorMessage)
+      toast.error('Failed to load services', errorMessage)
+    } finally {
+      setLoading(false)
+      setRetrying(false)
+    }
+  }
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    await fetchData()
+  }
 
   const filteredServices = selectedCategory 
     ? services.filter(service => service.category_id === selectedCategory)
@@ -137,30 +190,22 @@ export function ServiceSelectionStep() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading services...</p>
-        </div>
-      </div>
+      <LoadingState 
+        message="Loading services..." 
+        variant="card"
+        className="h-64"
+      />
     )
   }
 
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center max-w-md">
-          <div className="text-red-500 text-lg font-semibold mb-2">Error Loading Services</div>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <div className="text-sm text-muted-foreground">
-            <p>Please check that:</p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Your .env.local file exists and contains the correct Supabase credentials</li>
-              <li>Supabase is running (local or remote)</li>
-              <li>Your internet connection is working</li>
-            </ul>
-          </div>
-        </div>
+        <RetryButton 
+          onRetry={handleRetry}
+          loading={retrying}
+          error={error}
+        />
       </div>
     )
   }
@@ -212,7 +257,7 @@ export function ServiceSelectionStep() {
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="secondary">
-                            ₦{(service.base_price / 100).toFixed(2)}
+                            {formatServicePrice(service.base_price)}
                           </Badge>
                           <Badge variant="outline">
                             {(service as any).unit || 'item'}
@@ -281,7 +326,7 @@ export function ServiceSelectionStep() {
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="secondary">
-                            +₦{(extra.price / 100).toFixed(2)}
+                            {formatExtraPrice(extra.price)}
                           </Badge>
                         </div>
                       </div>
@@ -342,7 +387,7 @@ export function ServiceSelectionStep() {
                   <div key={serviceData.service_item_id} className="flex justify-between items-center">
                     <span className="text-sm">{service.name} x{serviceData.quantity}</span>
                     <span className="text-sm font-medium">
-                      ₦{((service.base_price / 100) * serviceData.quantity).toFixed(2)}
+                      {formatTotalAmount(service.base_price * serviceData.quantity)}
                     </span>
                   </div>
                 )
@@ -354,7 +399,7 @@ export function ServiceSelectionStep() {
                   <div key={extraData.service_extra_id} className="flex justify-between items-center">
                     <span className="text-sm">{extra.name} x{extraData.quantity}</span>
                     <span className="text-sm font-medium">
-                      ₦{((extra.price / 100) * extraData.quantity).toFixed(2)}
+                      {formatTotalAmount(extra.price * extraData.quantity)}
                     </span>
                   </div>
                 )

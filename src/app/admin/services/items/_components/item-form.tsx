@@ -32,9 +32,11 @@ const itemSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   base_price: z.number().min(0, 'Price must be non-negative').max(9999.99, 'Price must be less than $10,000'),
-  duration_minutes: z.number().min(1, 'Duration must be at least 1 minute').max(1440, 'Duration must be less than 24 hours'),
-  is_active: z.boolean().default(true),
-  sort_order: z.number().min(0, 'Sort order must be non-negative').default(0)
+  unit: z.string().min(1, 'Unit is required').max(20, 'Unit must be less than 20 characters'),
+  is_quantity_based: z.boolean(),
+  min_quantity: z.number().min(1, 'Minimum quantity must be at least 1'),
+  max_quantity: z.number().min(1, 'Maximum quantity must be at least 1'),
+  is_active: z.boolean()
 })
 
 type ItemFormData = z.infer<typeof itemSchema>
@@ -72,9 +74,11 @@ export function ItemForm({
       name: '',
       description: '',
       base_price: 0,
-      duration_minutes: 60,
-      is_active: true,
-      sort_order: 0
+      unit: 'hour',
+      is_quantity_based: false,
+      min_quantity: 1,
+      max_quantity: 10,
+      is_active: true
     }
   })
 
@@ -90,9 +94,11 @@ export function ItemForm({
           name: item.name,
           description: item.description || '',
           base_price: item.base_price,
-          duration_minutes: item.duration_minutes,
-          is_active: item.is_active,
-          sort_order: item.sort_order
+          unit: item.unit,
+          is_quantity_based: item.is_quantity_based,
+          min_quantity: item.min_quantity,
+          max_quantity: item.max_quantity,
+          is_active: item.is_active
         })
         setIsActive(item.is_active)
       } else {
@@ -101,9 +107,11 @@ export function ItemForm({
           name: '',
           description: '',
           base_price: 0,
-          duration_minutes: 60,
-          is_active: true,
-          sort_order: 0
+          unit: 'hour',
+          is_quantity_based: false,
+          min_quantity: 1,
+          max_quantity: 10,
+          is_active: true
         })
         setIsActive(true)
       }
@@ -111,7 +119,10 @@ export function ItemForm({
   }, [isOpen, item, reset])
 
   const handleFormSubmit = (data: ItemFormData) => {
-    onSubmit(data)
+    onSubmit({
+      ...data,
+      description: data.description || null
+    })
   }
 
   const handleClose = () => {
@@ -208,43 +219,73 @@ export function ItemForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="duration_minutes">Duration (minutes) *</Label>
+              <Label htmlFor="unit">Unit *</Label>
               <Input
-                id="duration_minutes"
-                type="number"
-                min="1"
-                max="1440"
-                {...register('duration_minutes', { valueAsNumber: true })}
-                placeholder="60"
+                id="unit"
+                {...register('unit')}
+                placeholder="e.g., hour, room, sq ft"
                 disabled={isSubmitting}
               />
-              {errors.duration_minutes && (
-                <p className="text-sm text-red-600">{errors.duration_minutes.message}</p>
+              {errors.unit && (
+                <p className="text-sm text-red-600">{errors.unit.message}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="sort_order">Sort Order</Label>
-              <Input
-                id="sort_order"
-                type="number"
-                {...register('sort_order', { valueAsNumber: true })}
-                placeholder="0"
-                min="0"
-                disabled={isSubmitting}
-              />
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_quantity_based"
+                  checked={watch('is_quantity_based')}
+                  onCheckedChange={(checked) => setValue('is_quantity_based', checked, { shouldDirty: true })}
+                  disabled={isSubmitting}
+                />
+                <Label htmlFor="is_quantity_based">
+                  Quantity-based pricing
+                </Label>
+              </div>
               <p className="text-xs text-gray-500">
-                Lower numbers appear first in lists
+                Enable if customers can select different quantities
               </p>
-              {errors.sort_order && (
-                <p className="text-sm text-red-600">{errors.sort_order.message}</p>
-              )}
             </div>
 
+            {watch('is_quantity_based') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="min_quantity">Minimum Quantity</Label>
+                  <Input
+                    id="min_quantity"
+                    type="number"
+                    min="1"
+                    {...register('min_quantity', { valueAsNumber: true })}
+                    placeholder="1"
+                    disabled={isSubmitting}
+                  />
+                  {errors.min_quantity && (
+                    <p className="text-sm text-red-600">{errors.min_quantity.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="max_quantity">Maximum Quantity</Label>
+                  <Input
+                    id="max_quantity"
+                    type="number"
+                    min="1"
+                    {...register('max_quantity', { valueAsNumber: true })}
+                    placeholder="10"
+                    disabled={isSubmitting}
+                  />
+                  {errors.max_quantity && (
+                    <p className="text-sm text-red-600">{errors.max_quantity.message}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 pt-6">
+              <div className="flex items-center space-x-2">
                 <Switch
                   id="is_active"
                   checked={watchedIsActive}

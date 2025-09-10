@@ -24,8 +24,8 @@ const extraSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   price: z.number().min(0, 'Price must be non-negative').max(9999.99, 'Price must be less than $10,000'),
-  is_active: z.boolean().default(true),
-  sort_order: z.number().min(0, 'Sort order must be non-negative').default(0)
+  is_active: z.boolean(),
+  sort_order: z.number().min(0, 'Sort order must be non-negative')
 })
 
 type ExtraFormData = z.infer<typeof extraSchema>
@@ -76,7 +76,7 @@ export function ExtraForm({
           description: extra.description || '',
           price: extra.price,
           is_active: extra.is_active,
-          sort_order: extra.sort_order
+          sort_order: (extra as any).sort_order || 0
         })
         setIsActive(extra.is_active)
       } else {
@@ -93,7 +93,11 @@ export function ExtraForm({
   }, [isOpen, extra, reset])
 
   const handleFormSubmit = (data: ExtraFormData) => {
-    onSubmit(data)
+    const transformedData = {
+      ...data,
+      description: data.description || null
+    }
+    onSubmit(transformedData)
   }
 
   const handleClose = () => {

@@ -18,6 +18,7 @@ import {
   Download,
   Share2
 } from 'lucide-react'
+import { formatServicePrice, formatExtraPrice, formatTotalAmount } from '@/lib/currency'
 
 interface BookingConfirmationProps {
   bookingId?: string
@@ -180,7 +181,7 @@ export function BookingConfirmation({ bookingId, className }: BookingConfirmatio
                       <p className="text-sm text-muted-foreground">Quantity: {serviceData.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${(service.base_price * serviceData.quantity).toFixed(2)}</p>
+                      <p className="font-medium">{formatTotalAmount(service.base_price * serviceData.quantity)}</p>
                     </div>
                   </div>
                 )
@@ -197,7 +198,7 @@ export function BookingConfirmation({ bookingId, className }: BookingConfirmatio
                       <p className="text-sm text-muted-foreground">Quantity: {extraData.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${(extra.price * extraData.quantity).toFixed(2)}</p>
+                      <p className="font-medium">{formatTotalAmount(extra.price * extraData.quantity)}</p>
                     </div>
                   </div>
                 )
@@ -287,7 +288,7 @@ export function BookingConfirmation({ bookingId, className }: BookingConfirmatio
         <CardContent>
           <div className="flex justify-between items-center text-lg font-semibold mb-4">
             <span>Total Amount</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{formatTotalAmount(total * 100)}</span>
           </div>
           
           <div className="flex flex-wrap gap-2">

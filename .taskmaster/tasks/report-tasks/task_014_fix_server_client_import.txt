@@ -1,0 +1,64 @@
+# Task 14: Fix Critical Server/Client Component Import Error
+
+## Priority: CRITICAL (High)
+## Status: Pending
+## Estimated Time: 2-4 hours
+
+## Problem Description
+The `database.ts` file imports from `supabase.ts` which includes server-side code (`next/headers`), but `database.ts` is being used in client components like `test-db/page.tsx`. This causes a critical error:
+
+```
+Error: You're importing a component that needs "next/headers". That only works in a Server Component which is not supported in the pages/ directory.
+```
+
+## Files Affected
+- `src/lib/database.ts`
+- `src/lib/supabase.ts`
+- `src/app/test-db/page.tsx`
+- Any client component using `DatabaseService`
+
+## Root Cause
+The `database.ts` file imports from `supabase.ts` which includes server-side code, but it's being used in client components.
+
+## Solution Required
+1. **Separate client and server database utilities**
+   - Create `src/lib/database-client.ts` for client-side operations
+   - Keep `src/lib/database.ts` for server-side operations only
+   - Update imports in client components
+
+2. **Create client-specific database functions**
+   - Move client-side database operations to new file
+   - Use `createClient` from `@supabase/supabase-js` directly
+   - Avoid importing server-side utilities
+
+3. **Update components to use appropriate utilities**
+   - Update `test-db/page.tsx` to use client-side database utilities
+   - Update `ServiceSelectionStep.tsx` to use client-side utilities
+   - Update any other client components using `DatabaseService`
+
+## Implementation Steps
+1. Create `src/lib/database-client.ts` with client-side database functions
+2. Update `src/app/test-db/page.tsx` to use client-side utilities
+3. Update `src/components/booking/steps/ServiceSelectionStep.tsx`
+4. Test database connection page functionality
+5. Test service selection in booking form
+6. Verify no server-side imports in client components
+
+## Acceptance Criteria
+- [ ] `test-db` page loads without errors
+- [ ] Service selection step works in booking form
+- [ ] No server-side imports in client components
+- [ ] Database operations work correctly in client components
+- [ ] All existing functionality remains intact
+
+## Testing
+- Test database connection page at `/test-db`
+- Test service selection in booking form at `/book`
+- Verify no console errors related to server/client imports
+- Test all database operations in client components
+
+## Dependencies
+- None (this is a blocking issue for other tasks)
+
+## Notes
+This is the highest priority issue as it blocks core functionality. Must be completed before other tasks can proceed effectively.

@@ -18,6 +18,7 @@ import {
   Calendar,
   MoreHorizontal,
   UserCheck,
+  DollarSign,
   UserX,
   Eye,
   Edit,

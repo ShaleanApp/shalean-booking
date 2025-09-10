@@ -1,6 +1,6 @@
 # Task ID: 7
 # Title: Multi-Step Booking Form with Guest Support
-# Status: pending
+# Status: done
 # Dependencies: 6
 # Priority: high
 # Description: Implement the complete multi-step booking flow: service selection → details → schedule → address → review → payment.
@@ -9,3 +9,158 @@ Create multi-step booking form with progress indicator, implement service select
 
 # Test Strategy:
 Test complete booking flow, verify form validation, test guest vs authenticated user flows, and ensure data persistence works correctly.
+
+# Subtasks:
+## 1. Implement Core Multi-Step Booking Form Structure [done]
+### Dependencies: None
+### Description: Create the main multi-step form component, including a progress indicator, step navigation (next/back buttons), and state management for the current step and booking data.
+### Details:
+Set up the `/booking` route. Design the overall layout using shadcn/ui components. Implement a state management solution (e.g., React Context or Zustand) to hold booking draft data across steps. Create a visual progress indicator that updates with step changes.
+<info added on 2025-09-09T21:45:56.934Z>
+With the `ServiceSelectionStep.tsx` component and `BookingContext` now in place, the next step is to implement the full functionality for service selection.
+
+**Implementation Plan:**
+1.  **Fetch Service Data:** In `ServiceSelectionStep.tsx`, implement the logic to fetch service categories, main services, and optional extras from your Supabase tables (e.g., `service_categories`, `services`).
+2.  **Render Categories and Services:**
+    *   Use the `Accordion` component from shadcn/ui to display the fetched service categories.
+    *   Inside each accordion item, render the associated services using `Card` components. Each card should display the service name, description, and price.
+3.  **Implement Selection and Quantity Controls:**
+    *   For services that can be selected once (e.g., 'Standard Clean'), use a "Select" button.
+    *   For services with variable quantities (e.g., 'Bedrooms'), add quantity controls (e.g., an `Input` with plus/minus buttons).
+    *   Display optional 'Extras' (e.g., 'Inside Fridge') as a list of `Checkbox` items or similar selectable components.
+4.  **Integrate with State:**
+    *   On any user interaction (selection, quantity change), call the appropriate action from `BookingContext` to update the `formData` (e.g., `updateFormData({ services: [...], extras: [...] })`).
+    *   Ensure the component correctly reflects the current state from the context, especially when the user navigates back to this step.
+5.  **Display Running Subtotal:** Add a summary section within the step that dynamically calculates and displays a subtotal based on the items currently in the `formData`.
+</info added on 2025-09-09T21:45:56.934Z>
+
+## 2. Develop Service Selection and Details Step [done]
+### Dependencies: 7.1
+### Description: Implement the first two steps of the booking flow: service category and item selection, and adding optional extras. Fetch service data from Supabase.
+### Details:
+Create components for displaying `service_categories`, `service_items`, and `extras` from the Supabase database. Allow users to select services and quantities. Integrate with the multi-step form's shared data state. Implement form validation using `react-hook-form` and `zod` for required selections.
+<info added on 2025-09-09T21:47:34.800Z>
+### Implementation Update & Next Steps
+
+The core UI and data flow for the service selection step have been successfully implemented, establishing a strong foundation.
+
+**Completed Implementation:**
+-   **Component Structure:** The step is orchestrated by `components/booking/ServiceSelectionStep.tsx`, which correctly fetches data using queries from `lib/supabase/queries.ts`.
+-   **UI Components:**
+    -   `components/booking/ServiceCategorySelector.tsx`: Manages the selection of a service category.
+    -   `components/booking/ServiceItemCard.tsx`: Displays individual services with quantity controls, filtering based on the selected category.
+    -   `components/booking/ExtrasSelector.tsx`: Allows for the selection of optional extras.
+    -   `components/booking/BookingSummary.tsx`: Provides a real-time summary of the user's selections and total cost.
+-   **State Management:** All selections and quantity changes correctly update the shared `BookingContext`, ensuring data persistence across the multi-step form.
+-   **Data Fetching:** Data for service categories, items, and extras is fetched from Supabase with appropriate loading and error states.
+
+**Next Steps: Form Validation**
+
+The final requirement for this subtask is to integrate form validation to ensure a valid selection is made before proceeding.
+
+1.  **Update Zod Schema:**
+    -   In `lib/schemas.ts`, modify the `BookingSchema` to enforce that at least one service item is selected. The `services` object should not be empty.
+    -   Example validation using `refine`:
+        ```typescript
+        // In lib/schemas.ts
+        export const BookingSchema = z.object({
+          // ... other fields
+          services: z.record(z.string(), z.object({
+            quantity: z.number().min(1),
+            // ... other service properties
+          })).refine(services => Object.keys(services).length > 0, {
+            message: "Please select at least one service to continue.",
+          }),
+          // ...
+        });
+        ```
+
+2.  **Integrate `react-hook-form`:**
+    -   The main multi-step form wrapper (likely in `app/book/page.tsx` or a dedicated `BookingForm` component) should initialize `useForm` with the `BookingSchema`.
+    -   The `ServiceSelectionStep` does not need to be a form itself. The global state from `BookingContext` will serve as the data source for the main form.
+    -   The "Next Step" button's `onClick` handler should trigger `form.trigger()` to validate the current step's fields (in this case, the `services` field from the context).
+
+3.  **Display Validation Errors:**
+    -   If validation fails, use the `form.formState.errors` object to display an error message near the service selection area or the "Next Step" button. This will prevent the user from advancing with an empty cart.
+</info added on 2025-09-09T21:47:34.800Z>
+
+## 3. Implement Scheduling and Address Management Steps [done]
+### Dependencies: 7.1, 7.2
+### Description: Create the scheduling interface for date and time slot selection, and the address management step allowing users to select saved addresses or input new ones.
+### Details:
+Integrate a date/time picker component (e.g., from shadcn/ui or a compatible library). Implement logic to display available time slots. For address management, fetch existing `addresses` for authenticated users from Supabase. Provide a form for new address input for both guests and authenticated users. Store selected/new address and schedule data in the booking draft.
+<info added on 2025-09-09T21:49:44.260Z>
+**Implementation Summary:**
+
+**Scheduling Step (`components/booking/ScheduleStep.tsx`):**
+- Integrated the `shadcn/ui` `Calendar` component for date selection.
+- Implemented date validation logic to enforce a selectable range from tomorrow up to 3 months ahead, likely using `date-fns`.
+- Dynamically generated 30-minute time slots (8:00 AM - 6:00 PM) and implemented availability logic, including mock unavailable times and weekend restrictions.
+- The selected time is reset when the date changes to ensure re-validation.
+- Time slots are rendered in a responsive grid, with conditional styling for `disabled` and `selected` states.
+- The selected `scheduledAt` (Date object) is saved to the `BookingContext`.
+
+**Address Management Step (`components/booking/AddressStep.tsx`):**
+- For authenticated users, a `useEffect` hook fetches existing addresses from the Supabase `addresses` table using a query function (e.g., in `lib/supabase/queries.ts`).
+- Saved addresses are displayed in selectable cards, showing address type (home, office, etc.) and a default indicator.
+- A toggle allows users to switch between selecting a saved address and inputting a new one.
+- The "New Address" form is built with `react-hook-form` and validated against a `zod` schema, using `shadcn/ui` components (`Input`, `Select`).
+- The selected existing address or the newly entered address data is stored in the `address` field of the `BookingContext`.
+</info added on 2025-09-09T21:49:44.260Z>
+
+## 4. Develop Booking Review and Confirmation with Guest Draft Persistence [done]
+### Dependencies: 7.1, 7.2, 7.3
+### Description: Implement the final review step, allowing users to confirm all booking details. Implement the logic to save booking drafts for guest users (e.g., in `localStorage`) and the final booking to Supabase.
+### Details:
+Display a comprehensive summary of all selected services, schedule, and address details. Create a mechanism to persist the booking draft data (e.g., using `localStorage` or `sessionStorage`) for guest users, allowing them to resume later. Implement the Supabase client-side logic to insert the final booking into `bookings` and `booking_items` tables upon confirmation. Handle user authentication status for saving.
+<info added on 2025-09-09T21:53:27.782Z>
+**Implementation Update:**
+
+**1. Booking Review Step (`ReviewStep`):**
+- A comprehensive review step has been implemented to display a full summary before confirmation.
+- It fetches service details directly from Supabase to ensure accurate, real-time pricing.
+- The summary includes:
+    - A list of selected services with quantities and individual prices.
+    - A breakdown of any selected extras and their costs.
+    - The chosen schedule, with formatted date and time.
+    - The selected delivery address (either a saved address or a new one).
+    - A section for additional user notes.
+- A real-time total cost is calculated and displayed.
+- The layout is built using a professional, responsive, card-based design with `shadcn/ui` components.
+
+**2. Guest Draft Persistence and Restoration:**
+- The `BookingContext` has been enhanced to automatically save booking progress to `localStorage` for guest users.
+- The saved draft includes metadata such as a timestamp and version number for better management and future compatibility.
+- A new `DraftRestoration` component has been created to alert users of an existing draft upon visiting the booking page.
+    - It displays an amber-themed notification with the draft's age (e.g., "saved 2 hours ago").
+    - Provides clear user actions: "Continue with draft", "Start a new booking", or "Delete draft".
+- Utility functions (`hasDraft`, `getDraftAge`, `saveDraft`, `loadDraft`, `clearDraft`) have been added to manage the draft lifecycle.
+
+**3. Booking Confirmation and Data Persistence:**
+- A new `BookingConfirmation` page is now displayed after a successful booking.
+- It features a success animation, confirmation message, and displays the final Booking ID.
+- It provides a complete summary of the confirmed booking details and payment status.
+- Includes action buttons for next steps: "View all bookings", "Book another service", and placeholders for "Download receipt" and "Share booking".
+- Upon successful booking confirmation, the logic correctly inserts the data into the Supabase `bookings` and `booking_items` tables.
+- The guest draft is automatically cleared from `localStorage` after the booking is successfully finalized.
+</info added on 2025-09-09T21:53:27.782Z>
+
+## 5. Integrate Payment Gateway and Finalize Booking Flow [done]
+### Dependencies: 7.1, 7.2, 7.3, 7.4
+### Description: Implement the payment step using Paystack and handle the post-payment success/failure flow, including updating booking status and displaying confirmation.
+### Details:
+Integrate the Paystack payment gateway into the final step of the booking form. Handle payment success callbacks to update the `bookings` table status (e.g., to 'pending_payment' or 'confirmed') and record payment details in the `payments` table. Implement robust error handling for failed payments. Redirect users to a booking confirmation page or display a success message based on payment outcome.
+<info added on 2025-09-09T21:59:18.081Z>
+Based on the work completed, the following implementation details have been added:
+
+- **Booking Creation API (`/api/booking`):** An endpoint was created to handle the booking logic *before* payment. It validates all form data, calculates the final price from database values, creates records in the `bookings`, `booking_services`, and `booking_extras` tables, and generates a unique payment reference.
+- **Paystack Frontend Integration:** A `PaystackPayment` React component was developed using the `@paystack/inline-js` library. This component is initialized after a booking is successfully created via the API and handles the client-side payment flow, including success and close callbacks.
+- **Secure Webhook Handler (`/api/webhooks/paystack`):** A robust webhook endpoint was implemented to asynchronously handle payment events from Paystack. It includes:
+    - **HMAC SHA-512 Signature Verification:** Ensures that incoming webhook requests are genuinely from Paystack.
+    - **Idempotency:** Prevents duplicate processing of the same event.
+    - **Event Handling:** Processes `charge.success` events to update the `bookings` table status to 'confirmed' and records transaction details in the `payments` table.
+- **Dynamic Confirmation Page (`/booking/confirmation/[bookingId]`):** A dedicated, server-rendered page was created to display a comprehensive summary of the completed booking. It fetches all relevant booking data, including services, extras, pricing, and payment status, directly from the database using the booking ID.
+- **State and Draft Management:** Upon successful payment confirmation on the client side, the guest's booking draft is cleared from local storage (`useBookingStore`), and the user is redirected to the new confirmation page.
+- **Payment Utilities:** Helper functions were created in `lib/utils.ts` and `lib/paystack.ts` for generating payment references, currency conversion (`nairaToKobo`), and formatting.
+</info added on 2025-09-09T21:59:18.081Z>
+

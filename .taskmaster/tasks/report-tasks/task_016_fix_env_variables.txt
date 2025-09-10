@@ -1,0 +1,60 @@
+# Task 16: Fix Environment Variable Configuration Issues
+
+## Priority: High
+## Status: Pending
+## Estimated Time: 1 hour
+
+## Problem Description
+Environment variable configuration issues that may cause runtime errors in production:
+- Missing `NEXT_PUBLIC_BASE_URL` in auth redirects (fallback to localhost)
+- Some environment variables may not be properly configured for production
+- Auth redirects using hardcoded localhost URLs
+
+## Files Affected
+- `src/app/auth/login/page.tsx` (line 62)
+- `src/app/auth/register/page.tsx` (line 62)
+- `.env.local` and `.env` files
+- Production deployment configuration
+
+## Solution Required
+1. **Add missing environment variables**
+   - Add `NEXT_PUBLIC_BASE_URL` to environment configuration
+   - Ensure all required variables are documented
+   - Create production environment template
+
+2. **Update auth redirects**
+   - Replace hardcoded localhost URLs with environment variables
+   - Ensure proper fallback values
+   - Test redirects in different environments
+
+3. **Create environment documentation**
+   - Document all required environment variables
+   - Create example environment files
+   - Add validation for required variables
+
+## Implementation Steps
+1. Add `NEXT_PUBLIC_BASE_URL` to `.env.local`
+2. Update auth redirect URLs in login and register pages
+3. Create `.env.example` with all required variables
+4. Add environment variable validation
+5. Update deployment documentation
+6. Test auth redirects in development and production
+
+## Acceptance Criteria
+- [ ] All required environment variables are documented
+- [ ] Auth redirects use environment variables instead of hardcoded URLs
+- [ ] `.env.example` file exists with all required variables
+- [ ] Environment variable validation is in place
+- [ ] Production deployment works with proper environment configuration
+
+## Testing
+- Test auth redirects in development
+- Test auth redirects in production
+- Verify environment variables are loaded correctly
+- Test with missing environment variables (should show helpful errors)
+
+## Dependencies
+- None (can be done independently)
+
+## Notes
+This ensures proper configuration for production deployment and prevents runtime errors due to missing environment variables.

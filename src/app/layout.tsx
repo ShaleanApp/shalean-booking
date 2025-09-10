@@ -4,6 +4,8 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/toaster";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { ToastContainer } from "@/components/shared/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,14 +48,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://shaleancleaning.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://shaleancleaning.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://shaleancleaning.com",
+    url: process.env.NEXT_PUBLIC_BASE_URL || "https://shaleancleaning.com",
     siteName: "Shalean Cleaning Services",
     title: "Shalean Cleaning Services - Professional Home & Office Cleaning",
     description: "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",
@@ -102,14 +104,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
-        </div>
+        <ErrorBoundary>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <Toaster />
+            <ToastContainer />
+          </div>
+        </ErrorBoundary>
       </body>
     </html>
   );

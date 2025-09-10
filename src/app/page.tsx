@@ -7,22 +7,24 @@ import Script from "next/script";
 import { ServiceBrowser } from "@/components/services/ServiceBrowser";
 
 export default function Home() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '${baseUrl}'
+  
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "LocalBusiness",
-        "@id": "https://shaleancleaning.com/#organization",
+        "@id": `${baseUrl}/#organization`,
         "name": "Shalean Cleaning Services",
         "alternateName": "Shalean Cleaning",
-        "url": "https://shaleancleaning.com",
+        "url": baseUrl,
         "logo": {
           "@type": "ImageObject",
-          "url": "https://shaleancleaning.com/logo.png",
+          "url": `${baseUrl}/logo.png`,
           "width": 200,
           "height": 200
         },
-        "image": "https://shaleancleaning.com/og-image.jpg",
+        "image": `${baseUrl}/og-image.jpg`,
         "description": "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",
         "telephone": "+1-555-123-4567",
         "email": "info@shaleancleaning.com",
@@ -74,7 +76,7 @@ export default function Home() {
                 "name": "Residential Cleaning",
                 "description": "Regular home cleaning services including living areas, kitchen, bathrooms, and bedrooms",
                 "provider": {
-                  "@id": "https://shaleancleaning.com/#organization"
+                  "@id": "${baseUrl}/#organization"
                 }
               }
             },
@@ -85,7 +87,7 @@ export default function Home() {
                 "name": "Deep Cleaning",
                 "description": "Thorough cleaning for special occasions including inside appliances, baseboards, and light fixtures",
                 "provider": {
-                  "@id": "https://shaleancleaning.com/#organization"
+                  "@id": "${baseUrl}/#organization"
                 }
               }
             },
@@ -96,7 +98,7 @@ export default function Home() {
                 "name": "Move-in/Move-out Cleaning",
                 "description": "Cleaning for transitions including empty property cleaning, cabinet interiors, and window cleaning",
                 "provider": {
-                  "@id": "https://shaleancleaning.com/#organization"
+                  "@id": "${baseUrl}/#organization"
                 }
               }
             },
@@ -107,7 +109,7 @@ export default function Home() {
                 "name": "Commercial Cleaning",
                 "description": "Office and business cleaning including office spaces, restrooms, and common areas",
                 "provider": {
-                  "@id": "https://shaleancleaning.com/#organization"
+                  "@id": "${baseUrl}/#organization"
                 }
               }
             }
@@ -164,19 +166,19 @@ export default function Home() {
       },
       {
         "@type": "WebSite",
-        "@id": "https://shaleancleaning.com/#website",
-        "url": "https://shaleancleaning.com",
+        "@id": "${baseUrl}/#website",
+        "url": "${baseUrl}",
         "name": "Shalean Cleaning Services",
         "description": "Professional cleaning services for your home and office",
         "publisher": {
-          "@id": "https://shaleancleaning.com/#organization"
+          "@id": "${baseUrl}/#organization"
         },
         "potentialAction": [
           {
             "@type": "SearchAction",
             "target": {
               "@type": "EntryPoint",
-              "urlTemplate": "https://shaleancleaning.com/search?q={search_term_string}"
+              "urlTemplate": "${baseUrl}/search?q={search_term_string}"
             },
             "query-input": "required name=search_term_string"
           }
@@ -184,14 +186,14 @@ export default function Home() {
       },
       {
         "@type": "WebPage",
-        "@id": "https://shaleancleaning.com/#webpage",
-        "url": "https://shaleancleaning.com",
+        "@id": "${baseUrl}/#webpage",
+        "url": "${baseUrl}",
         "name": "Shalean Cleaning Services - Professional Home & Office Cleaning",
         "isPartOf": {
-          "@id": "https://shaleancleaning.com/#website"
+          "@id": "${baseUrl}/#website"
         },
         "about": {
-          "@id": "https://shaleancleaning.com/#organization"
+          "@id": "${baseUrl}/#organization"
         },
         "description": "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",
         "breadcrumb": {
@@ -201,7 +203,7 @@ export default function Home() {
               "@type": "ListItem",
               "position": 1,
               "name": "Home",
-              "item": "https://shaleancleaning.com"
+              "item": "${baseUrl}"
             }
           ]
         }

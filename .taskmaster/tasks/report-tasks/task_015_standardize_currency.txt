@@ -1,0 +1,59 @@
+# Task 15: Standardize Currency Formatting Across All Components
+
+## Priority: High
+## Status: Pending
+## Estimated Time: 1-2 hours
+
+## Problem Description
+Inconsistent currency formatting across the application:
+- ServiceBrowser uses USD formatting (`$150.00`)
+- ServiceSelectionStep uses NGN formatting (`₦150.00`)
+- Admin dashboard uses NGN formatting
+- This creates confusion for users and inconsistent pricing display
+
+## Files Affected
+- `src/components/services/ServiceBrowser.tsx` (line 84-88)
+- `src/components/booking/steps/ServiceSelectionStep.tsx` (line 215, 284)
+- `src/app/admin/page.tsx` (line 145-150)
+
+## Solution Required
+1. **Decide on primary currency**
+   - Choose between NGN (Nigerian Naira) or USD (US Dollar)
+   - Based on target market and business requirements
+
+2. **Create centralized currency utility**
+   - Create `src/lib/currency.ts` with formatting functions
+   - Include currency symbol, locale, and formatting options
+
+3. **Update all components to use consistent formatting**
+   - Replace hardcoded currency formatting
+   - Use centralized utility functions
+   - Ensure consistent display across the application
+
+## Implementation Steps
+1. Create `src/lib/currency.ts` with formatting utilities
+2. Update `ServiceBrowser.tsx` to use centralized formatting
+3. Update `ServiceSelectionStep.tsx` to use centralized formatting
+4. Update `admin/page.tsx` to use centralized formatting
+5. Add currency configuration to environment variables
+6. Test all components for consistent currency display
+
+## Acceptance Criteria
+- [ ] All components display currency consistently
+- [ ] Currency formatting is centralized in utility functions
+- [ ] Environment variable for currency configuration
+- [ ] No hardcoded currency symbols or formatting
+- [ ] Consistent user experience across the application
+
+## Testing
+- Verify currency display in service browser
+- Verify currency display in booking form
+- Verify currency display in admin dashboard
+- Test with different currency values
+- Ensure formatting is consistent across all pages
+
+## Dependencies
+- None (can be done independently)
+
+## Notes
+This improves user experience and maintains consistency. Should be completed after the critical server/client import issue is resolved.

@@ -205,7 +205,11 @@ export default function AdminAnalyticsPage() {
     })
 
     return Object.entries(trends)
-      .map(([date, value]) => ({ date, [valueField === 'amount' ? 'revenue' : 'bookings']: value }))
+      .map(([date, value]) => ({ 
+        date, 
+        revenue: valueField === 'amount' ? value : 0,
+        bookings: valueField === 'count' ? value : 0
+      }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }
 

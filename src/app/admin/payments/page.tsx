@@ -125,7 +125,6 @@ export default function AdminPaymentsPage() {
       filtered = filtered.filter(payment => 
         payment.booking?.customer?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         payment.booking?.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         payment.paystack_reference?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
@@ -498,7 +497,7 @@ export default function AdminPaymentsPage() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900">
-                          Payment #{payment.reference}
+                          Payment #{payment.paystack_reference || payment.id}
                         </h3>
                         <Badge className={getStatusColor(payment.status)}>
                           <div className="flex items-center space-x-1">

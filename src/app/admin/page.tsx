@@ -16,6 +16,7 @@ import {
   Clock,
   RefreshCw
 } from 'lucide-react'
+import { formatCurrency } from '@/lib/currency'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -142,12 +143,7 @@ export default function AdminPage() {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(amount)
-  }
+  // Using centralized formatCurrency from @/lib/currency
 
   const getActivityColor = (status: string) => {
     switch (status) {

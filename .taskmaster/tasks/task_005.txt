@@ -1,6 +1,6 @@
 # Task ID: 5
 # Title: Service Management System (Admin)
-# Status: pending
+# Status: done
 # Dependencies: 4
 # Priority: medium
 # Description: Create admin interface for managing service categories, items, and extras with full CRUD operations.
@@ -9,3 +9,127 @@ Build admin dashboard for service management, create forms for adding/editing se
 
 # Test Strategy:
 Test CRUD operations for services, verify pricing calculations, and ensure admin-only access is properly enforced.
+
+# Subtasks:
+## 1. Define Database Schema and Core API for Services [done]
+### Dependencies: None
+### Description: Establish the foundational data models and backend API endpoints for service management.
+### Details:
+Define Prisma models for `ServiceCategory`, `ServiceItem`, and `ServiceExtra` including fields like `name`, `description`, `price`, `isActive`, and relationships (e.g., `ServiceItem` linked to `ServiceCategory`). Implement core API routes (or tRPC procedures) for `GET`, `POST`, `PUT`, `DELETE` operations for all three service entities, ensuring proper data validation and error handling on the backend.
+<info added on 2025-09-09T21:11:37.495Z>
+**Implementation Plan:**
+
+With the backend API for service management now complete, the next step is to build the corresponding admin user interface for `ServiceCategory`. This UI will consume the newly created API endpoints.
+
+**1. Create the Service Categories Page:**
+-   Create a new page at `src/app/admin/services/categories/page.tsx`.
+-   This page will serve as the main view for listing and managing all service categories.
+-   It should be protected by the existing admin authentication middleware.
+
+**2. Implement the Category List View:**
+-   Within the page, create a data table component (e.g., `src/app/admin/services/categories/_components/category-table.tsx`) to display the categories.
+-   Use a data fetching hook (e.g., TanStack Query's `useQuery`) to call the `GET /api/services/categories` endpoint.
+-   The table should display key fields like `name`, `description`, and `isActive` status.
+-   Include action buttons for each row: "Edit" and "Delete".
+
+**3. Develop the Create/Edit Form:**
+-   Create a reusable form component, potentially within a modal dialog (leveraging existing UI components from `src/components/ui` if available, like `Dialog` and `Form`).
+-   This form will be used for both creating new categories and editing existing ones.
+-   **Create:** A "New Category" button on the main page should open this form. On submission, it will make a `POST` request to `/api/services/categories`.
+-   **Edit:** The "Edit" button in the table should open the form, pre-populated with data fetched from `GET /api/services/categories/[id]`. On submission, it will make a `PUT` request to `/api/services/categories/[id]`.
+-   Utilize the Zod validation schemas (likely located in a shared directory like `src/lib/validations/`) with a library like `react-hook-form` for client-side validation.
+
+**4. Implement the Delete Functionality:**
+-   The "Delete" button in the table should trigger a confirmation dialog (e.g., `AlertDialog`) to prevent accidental deletion.
+-   Upon confirmation, make a `DELETE` request to `/api/services/categories/[id]`.
+-   The API's built-in safety checks will prevent deletion if the category has dependent `ServiceItem`s, and the UI should be prepared to handle and display this specific error message to the admin.
+
+**5. State Management and API Interaction:**
+-   It is recommended to use TanStack Query (`@tanstack/react-query`) for managing server state.
+-   `useQuery` for fetching the list of categories.
+-   `useMutation` for `POST`, `PUT`, and `DELETE` operations.
+-   On successful mutations (create, update, delete), invalidate the `useQuery` key for the category list to automatically refetch and display the updated data.
+</info added on 2025-09-09T21:11:37.495Z>
+
+## 2. Implement Admin UI for Service Categories [done]
+### Dependencies: 5.1
+### Description: Develop the user interface for managing service categories within the admin dashboard.
+### Details:
+Create a new dedicated page or section within the existing `/dashboard` route for 'Service Management'. Implement a table or list view to display existing `ServiceCategory` entries. Develop a modal form using `shadcn/ui` components, `react-hook-form`, and `zod` for creating new and editing existing `ServiceCategory` entries. Integrate these forms with the API endpoints defined in Subtask 5.1 for CRUD operations.
+<info added on 2025-09-09T21:16:17.088Z>
+**Implementation Summary:**
+
+A dedicated page for Service Category management has been created at `/app/admin/services/categories/page.tsx`. This page serves as the main entry point and orchestrates the display and management of categories.
+
+- **Data & State Management:** A custom hook, `_hooks/use-categories.ts`, was implemented to encapsulate all data-fetching and mutation logic. It leverages `react-query` (`useQuery` for fetching, `useMutation` for CUD operations) to interact with the category API endpoints. The hook also implements optimistic updates for a smoother user experience when creating, updating, or deleting categories.
+
+- **UI Components:**
+  - **`_components/category-table.tsx`**: Displays the list of categories using a responsive, card-based layout built with `shadcn/ui`'s `<Card>` component. Each card includes status badges, metadata, and an action `<DropdownMenu>` for Edit and Delete actions.
+  - **`_components/category-form.tsx`**: A modal form, utilizing `shadcn/ui`'s `<Dialog>`, for creating and editing categories. Form state and validation are managed by `react-hook-form` and a corresponding `zod` schema, ensuring all required fields (`name`, `description`, `icon`, `sort_order`, `is_active`) are correctly handled.
+  - **`_components/delete-category-dialog.tsx`**: A confirmation dialog built with `<AlertDialog>` to prevent accidental deletions, including a server-side check to prevent deletion of categories that contain service items.
+
+- **Navigation & UX:** The main admin navigation has been updated to include a link to the new "Service Categories" page. The page includes breadcrumbs for easy navigation, and all interactive elements feature appropriate loading states, disabled states, and error handling to inform the user of the system's status.
+</info added on 2025-09-09T21:16:17.088Z>
+
+## 3. Implement Admin UI for Service Items with Pricing [done]
+### Dependencies: 5.1, 5.2
+### Description: Build the admin interface for managing individual service items, including their pricing.
+### Details:
+Create a dedicated section or page for managing `ServiceItem` entries. Implement a table/list view for `ServiceItems`, allowing filtering by `ServiceCategory`. Develop a modal form using `shadcn/ui`, `react-hook-form`, and `zod` for creating and editing `ServiceItem` entries. Include fields for name, description, price (with appropriate type/validation), and a dropdown to select its associated `ServiceCategory`. Integrate with the API endpoints from Subtask 5.1.
+<info added on 2025-09-09T21:21:31.160Z>
+**Implementation Update:**
+
+A comprehensive admin UI for service items has been implemented, expanding on the initial requirements.
+
+*   **File Structure & Components:**
+    *   **Main Page:** `app/admin/services/items/page.tsx` provides the main interface with authentication, filtering, and stats.
+    *   **Custom Hook:** `app/admin/services/items/_hooks/use-items.ts` centralizes all data logic, handling full CRUD operations, status toggling (`is_active`), and optimistic updates for an improved user experience.
+    *   **Item Table:** `app/admin/services/items/_components/item-table.tsx` displays items in a card-based layout, showing pricing, duration, category, and status badges. It also incorporates search and category filtering controls.
+    *   **Item Form:** The `app/admin/services/items/_components/item-form.tsx` modal now includes fields for `duration_minutes`, `sort_order`, and `is_active`, alongside the originally specified fields.
+    *   **Delete Dialog:** A dedicated `app/admin/services/items/_components/delete-item-dialog.tsx` ensures data integrity by performing a safety check that prevents the deletion of service items already linked to bookings.
+
+*   **Key Feature Enhancements:**
+    *   **Full CRUD & Status Toggle:** The UI supports creating, reading, updating, deleting, and toggling the active/inactive status of service items via the `use-items.ts` hook.
+    *   **Expanded Form Schema:** The form and underlying Zod schema now manage `duration_minutes` and `sort_order` for more detailed service definition.
+    *   **Advanced Filtering:** Functionality includes both filtering by `ServiceCategory` and a text-based search across item names and descriptions.
+    *   **Optimistic Updates:** The interface provides immediate feedback on actions like updates and status changes, enhancing perceived performance.
+    *   **Navigation:** The section is now integrated into the admin dashboard with corresponding breadcrumb navigation.
+</info added on 2025-09-09T21:21:31.160Z>
+
+## 4. Implement Admin UI for Service Extras with Pricing and Activation [done]
+### Dependencies: 5.1, 5.2
+### Description: Develop the admin interface for managing service extras, including pricing and activation status.
+### Details:
+Create a dedicated section or page for managing `ServiceExtra` entries. Implement a table/list view for `ServiceExtras`. Develop a modal form using `shadcn/ui`, `react-hook-form`, and `zod` for creating and editing `ServiceExtra` entries. Include fields for name, description, price, and a toggle/checkbox for `isActive` status. Integrate with the API endpoints from Subtask 5.1.
+<info added on 2025-09-09T21:25:03.644Z>
+**Implementation Summary:**
+
+The admin UI for Service Extras has been implemented in the `app/admin/services/extras/` directory, following the established project architecture.
+
+- **Primary Component:** The main page is `app/admin/services/extras/page.tsx`, which integrates search functionality and renders the list of extras.
+
+- **Data and State Management:** A custom hook, `app/admin/services/extras/_hooks/use-extras.ts`, was created to manage all logic. It combines a Zustand store for managing UI state (e.g., modal visibility) with TanStack React Query (`useQuery`, `useMutation`) for handling all asynchronous CRUD operations. The hook also implements optimistic updates for a smoother UX and specific error handling for deletion conflicts (e.g., when an extra is tied to a booking).
+
+- **UI Components:**
+    - **`_components/extra-table.tsx`**: Displays extras using a `Card`-based layout. Each card includes the price, an active/inactive `Badge`, and a `DropdownMenu` for Edit, Delete, and Toggle Status actions.
+    - **`_components/extra-form.tsx`**: A modal `Dialog` built with `shadcn/ui` for creating and editing extras. It leverages `react-hook-form` for state management and `zod` for validation via the `zodResolver`, using the `extraSchema` defined in `lib/schemas.ts`. The form includes all required fields, with the `price` field correctly configured as a number input and `is_active` as a `Switch`.
+    - **`_components/delete-extra-dialog.tsx`**: A standard `AlertDialog` component to provide a confirmation step before deleting an extra.
+</info added on 2025-09-09T21:25:03.644Z>
+
+## 5. Integrate Service Management into Dashboard and Finalize CRUD Operations [done]
+### Dependencies: 5.2, 5.3, 5.4
+### Description: Integrate all service management components into the main admin dashboard and complete full CRUD functionality.
+### Details:
+Add navigation links for 'Service Categories', 'Service Items', and 'Service Extras' to the main admin dashboard sidebar or navigation menu. Implement the activation/deactivation toggle functionality directly within the list views for `ServiceItem` and `ServiceExtra` entries, updating their `isActive` status via API calls. Ensure robust delete functionality for all three entities (categories, items, extras) with confirmation prompts. Conduct a final review for consistent UI/UX, error handling, and responsiveness across all service management forms and views.
+<info added on 2025-09-09T21:26:42.933Z>
+A central service management hub has been created at `app/admin/services/page.tsx`, providing a unified overview with real-time statistics (counts for categories, items, extras) and quick-access cards to each management area.
+
+In line with this, the main admin dashboard navigation has been updated to feature a single "Manage Services" link, consolidating the previously separate entry points.
+
+The implementation confirms full CRUD functionality, including:
+- Deletion protection with dependency checks (e.g., preventing deletion of a category if it has active service items).
+- Consistent UI/UX with breadcrumb navigation across all service management pages.
+
+Technical implementation details include the use of entity-specific custom hooks for state management with optimistic updates and Zod schemas for robust form validation.
+</info added on 2025-09-09T21:26:42.933Z>
+

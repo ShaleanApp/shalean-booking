@@ -138,7 +138,7 @@ export default function AdminBookingsPage() {
       service_date: booking.service_date,
       service_time: booking.service_time,
       notes: booking.notes || '',
-      special_instructions: booking.special_instructions || ''
+      special_instructions: booking.notes || '' // Use notes as special_instructions
     })
     setEditBookingOpen(true)
   }
@@ -498,7 +498,7 @@ export default function AdminBookingsPage() {
                           <DollarSign className="h-4 w-4 text-gray-400" />
                           <div>
                             <p className="text-sm font-medium text-gray-900">
-                              {formatCurrency(booking.total_amount)}
+                              {formatCurrency(booking.payment?.amount || 0)}
                             </p>
                             <p className="text-xs text-gray-500">
                               {booking.payment?.status || 'No payment'}

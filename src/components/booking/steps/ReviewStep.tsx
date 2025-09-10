@@ -9,6 +9,7 @@ import { useBooking } from '@/contexts/BookingContext'
 import { ServiceItem, ServiceExtra, Address } from '@/types'
 import { createClient } from '@/lib/supabase/client'
 import { Calendar, Clock, MapPin, DollarSign, FileText } from 'lucide-react'
+import { formatServicePrice, formatExtraPrice, formatTotalAmount } from '@/lib/currency'
 
 export function ReviewStep() {
   const { state, updateFormData } = useBooking()
@@ -130,8 +131,8 @@ export function ReviewStep() {
                     <p className="text-sm text-muted-foreground">Quantity: {serviceData.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">${(service.base_price * serviceData.quantity).toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">${service.base_price} each</p>
+                    <p className="font-medium">{formatTotalAmount(service.base_price * serviceData.quantity)}</p>
+                    <p className="text-sm text-muted-foreground">{formatServicePrice(service.base_price)} each</p>
                   </div>
                 </div>
               )
@@ -148,8 +149,8 @@ export function ReviewStep() {
                     <p className="text-sm text-muted-foreground">Quantity: {extraData.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">${(extra.price * extraData.quantity).toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">${extra.price} each</p>
+                    <p className="font-medium">{formatTotalAmount(extra.price * extraData.quantity)}</p>
+                    <p className="text-sm text-muted-foreground">{formatExtraPrice(extra.price)} each</p>
                   </div>
                 </div>
               )
@@ -254,7 +255,7 @@ export function ReviewStep() {
         <CardContent>
           <div className="flex justify-between items-center text-lg font-semibold">
             <span>Total Amount</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{formatTotalAmount(total * 100)}</span>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
             Payment will be processed on the next step

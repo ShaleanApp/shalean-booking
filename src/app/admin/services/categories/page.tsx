@@ -62,7 +62,12 @@ export default function ServiceCategoriesPage() {
 
   const handleCreateCategory = async (data: Omit<ServiceCategory, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      await createCategory.mutateAsync(data)
+      const transformedData = {
+        ...data,
+        description: data.description || undefined,
+        icon: data.icon || undefined
+      }
+      await createCategory.mutateAsync(transformedData)
       setIsFormOpen(false)
     } catch (error) {
       console.error('Error creating category:', error)
@@ -73,7 +78,12 @@ export default function ServiceCategoriesPage() {
     if (!editingCategory) return
     
     try {
-      await updateCategory.mutateAsync({ id: editingCategory.id, data })
+      const transformedData = {
+        ...data,
+        description: data.description || undefined,
+        icon: data.icon || undefined
+      }
+      await updateCategory.mutateAsync({ id: editingCategory.id, data: transformedData })
       setEditingCategory(null)
     } catch (error) {
       console.error('Error updating category:', error)

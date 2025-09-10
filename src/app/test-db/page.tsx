@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DatabaseService } from '@/lib/database'
+import { DatabaseClientService } from '@/lib/database-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,15 +23,15 @@ export default function TestDatabase() {
       setError(null)
 
       // Test fetching service categories
-      const categoriesData = await DatabaseService.getServiceCategories()
+      const categoriesData = await DatabaseClientService.getServiceCategories()
       setCategories(categoriesData)
 
       // Test fetching service items
-      const itemsData = await DatabaseService.getServiceItems()
+      const itemsData = await DatabaseClientService.getServiceItems()
       setItems(itemsData)
 
       // Test fetching service extras
-      const extrasData = await DatabaseService.getServiceExtras()
+      const extrasData = await DatabaseClientService.getServiceExtras()
       setExtras(extrasData)
 
       console.log('Database connection successful!')

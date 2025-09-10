@@ -1,6 +1,6 @@
 # Task ID: 2
 # Title: Supabase Database Schema Implementation
-# Status: pending
+# Status: done
 # Dependencies: 1
 # Priority: high
 # Description: Create and implement the complete database schema for Shalean Cleaning Services with all 9 tables and relationships.

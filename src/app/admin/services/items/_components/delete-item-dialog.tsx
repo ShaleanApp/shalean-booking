@@ -73,10 +73,10 @@ export function DeleteItemDialog({
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  <span>{item.duration_minutes} min</span>
+                  <span>Unit: {item.unit}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span>Category: {item.category?.name || 'Unknown'}</span>
+                  <span>Category ID: {item.category_id}</span>
                 </div>
               </div>
             </div>

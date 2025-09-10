@@ -6,9 +6,11 @@ interface CreateItemData {
   name: string
   description?: string
   base_price: number
-  duration_minutes: number
+  unit: string
+  is_quantity_based: boolean
+  min_quantity: number
+  max_quantity: number
   is_active?: boolean
-  sort_order?: number
 }
 
 interface UpdateItemData {

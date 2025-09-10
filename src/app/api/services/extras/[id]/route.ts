@@ -14,10 +14,11 @@ const updateExtraSchema = z.object({
 // GET /api/services/extras/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: extraId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -38,7 +39,7 @@ export async function GET(
     const { data: extra, error } = await supabase
       .from('service_extras')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', extraId)
       .single()
 
     if (error) {
@@ -59,10 +60,11 @@ export async function GET(
 // PUT /api/services/extras/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: extraId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -86,7 +88,7 @@ export async function PUT(
     const { data: extra, error } = await supabase
       .from('service_extras')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', extraId)
       .select()
       .single()
 
@@ -111,10 +113,11 @@ export async function PUT(
 // DELETE /api/services/extras/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: extraId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -136,7 +139,7 @@ export async function DELETE(
     const { data: bookingExtras } = await supabase
       .from('booking_extras')
       .select('id')
-      .eq('service_extra_id', params.id)
+      .eq('service_extra_id', extraId)
       .limit(1)
 
     if (bookingExtras && bookingExtras.length > 0) {
@@ -148,7 +151,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('service_extras')
       .delete()
-      .eq('id', params.id)
+      .eq('id', extraId)
 
     if (error) {
       if (error.code === 'PGRST116') {

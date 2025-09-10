@@ -14,10 +14,11 @@ const updateCategorySchema = z.object({
 // GET /api/services/categories/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -38,7 +39,7 @@ export async function GET(
     const { data: category, error } = await supabase
       .from('service_categories')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', categoryId)
       .single()
 
     if (error) {
@@ -59,10 +60,11 @@ export async function GET(
 // PUT /api/services/categories/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -86,7 +88,7 @@ export async function PUT(
     const { data: category, error } = await supabase
       .from('service_categories')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', categoryId)
       .select()
       .single()
 
@@ -111,10 +113,11 @@ export async function PUT(
 // DELETE /api/services/categories/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
+    const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -136,7 +139,7 @@ export async function DELETE(
     const { data: serviceItems } = await supabase
       .from('service_items')
       .select('id')
-      .eq('category_id', params.id)
+      .eq('category_id', categoryId)
       .limit(1)
 
     if (serviceItems && serviceItems.length > 0) {
@@ -148,7 +151,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('service_categories')
       .delete()
-      .eq('id', params.id)
+      .eq('id', categoryId)
 
     if (error) {
       if (error.code === 'PGRST116') {

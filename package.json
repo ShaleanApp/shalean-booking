@@ -10,6 +10,10 @@
     "start": "next start",
     "lint": "eslint",
     "setup-env": "node scripts/setup-env.js",
+    "validate-env": "node scripts/validate-env.js",
+    "validate-env:prod": "node scripts/validate-env.js --production",
+    "test-booking-flow": "node scripts/test-booking-flow.js",
+    "test-error-scenarios": "node scripts/test-error-scenarios.js",
     "test-email": "node scripts/test-email.js",
     "test-email-templates": "node scripts/test-email-templates.js"
   },

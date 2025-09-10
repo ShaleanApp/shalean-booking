@@ -1,6 +1,6 @@
 # Task ID: 13
 # Title: Real-time Notifications and Status Updates
-# Status: pending
+# Status: done
 # Dependencies: 12
 # Priority: low
 # Description: Implement real-time notifications for booking status changes and cleaner assignments.
@@ -9,3 +9,104 @@ Set up Supabase real-time subscriptions, implement real-time notifications for b
 
 # Test Strategy:
 Test real-time updates with multiple users, verify notification delivery, and test notification management features.
+
+# Subtasks:
+## 1. Set up Supabase Real-time Client and Generic Channel Listener [done]
+### Dependencies: None
+### Description: Configure the Supabase client to enable real-time subscriptions. Create a generic real-time channel to listen for changes on the 'notifications' table, logging incoming events to the console for initial verification.
+### Details:
+Leverage the existing Supabase client setup (e.g., `src/lib/supabase/client.ts`). Initialize a new Supabase real-time client instance. Create a channel (e.g., 'public:notifications') and subscribe to `postgres_changes` events on the `notifications` table. Implement a basic client-side listener to confirm real-time data flow.
+<info added on 2025-09-10T01:00:00.654Z>
+[
+  0
+]
+</info added on 2025-09-10T01:00:00.654Z>
+
+## 2. Implement Supabase Database Triggers for Notification Generation [done]
+### Dependencies: None
+### Description: Create database triggers or functions within Supabase to automatically insert new records into the `notifications` table whenever relevant changes occur in `bookings` (status changes), `booking_assignments` (new assignments), and `payments` (confirmation).
+### Details:
+Define PostgreSQL triggers on the `bookings` table (for `status` updates), `booking_assignments` table (for new assignments), and `payments` table (for `status` or `confirmed_at` updates). These triggers should call a PL/pgSQL function that constructs and inserts a new row into the `notifications` table, including `user_id`, `type`, `message`, and relevant foreign keys.
+<info added on 2025-09-10T01:03:16.324Z>
+**Implementation Summary:**
+
+A new database migration, `supabase/migrations/20241210_create_notification_triggers.sql`, was created to implement the notification logic. This migration also added a `read` boolean column to the `notifications` table to track read status.
+
+The core logic is encapsulated in a central PL/pgSQL function, `generate_notification()`, which is called by specific trigger functions:
+- `notify_booking_status_change()`: Triggered on the `bookings` table for status updates.
+- `notify_cleaner_assignment()`: Triggered on the `booking_assignments` table for new assignments.
+- `notify_payment_status_change()`: Triggered on the `payments` table for status updates.
+
+Notifications are generated for both customers and cleaners, depending on the event. The following notification `type` values are now being inserted into the `notifications` table:
+- **Booking:** `booking_confirmed`, `booking_started`, `booking_completed`, `booking_cancelled`
+- **Assignment:** `cleaner_assigned` (for customer), `new_booking_assigned` (for cleaner)
+- **Payment:** `payment_successful`, `payment_failed`, `payment_refunded`
+
+A complete testing infrastructure was also established:
+- A SQL function `test_notification_triggers()` was created for backend testing.
+- A new API endpoint at `src/app/api/test-notifications/route.ts` allows triggering the test function via a POST request.
+- The `src/app/test-realtime/page.tsx` was updated with a "Test Triggers" button to invoke this API and verify notification generation.
+</info added on 2025-09-10T01:03:16.324Z>
+
+## 3. Integrate Real-time Notifications with Frontend UI using shadcn/ui Toasts [done]
+### Dependencies: 13.1, 13.2
+### Description: Connect the real-time listener to the application's UI. Display incoming real-time notifications as transient toast messages using `shadcn/ui`'s Toast component, ensuring notifications are filtered and displayed only to the relevant user.
+### Details:
+Enhance the real-time listener from Subtask 1 to parse the incoming `notifications` table changes. Implement logic to check if the notification's `user_id` matches the currently logged-in user. If so, use `shadcn/ui`'s `useToast` hook to display a new toast notification with the relevant message and type. Ensure proper error handling and UI feedback.
+<info added on 2025-09-10T01:08:59.209Z>
+**Implementation Summary:**
+
+A new custom hook, `useRealtimeNotificationsWithToast`, has been created in `src/hooks/useRealtimeNotificationsWithToast.ts`. This hook encapsulates the real-time notification logic:
+
+- It establishes a subscription to the `public:notifications` table via a Supabase channel within a `useEffect` hook, ensuring proper subscription and cleanup.
+- It filters incoming notification payloads by comparing the `user_id` on the notification record with the ID of the currently authenticated user.
+- Upon receiving a relevant notification, it invokes the `toast()` function from the `src/hooks/use-toast.ts` hook.
+- A mapping logic is implemented to translate the notification `type` (e.g., `BOOKING_CONFIRMED`, `PAYMENT_FAILED`) into a corresponding toast variant (`success`, `destructive`, `warning`) and a user-friendly message for the title and description.
+
+To render the toasts, the `<Toaster />` component from `src/components/ui/toaster.tsx` has been integrated into the root layout at `src/app/layout.tsx`, making the toast system globally available. The new hook is currently being called on the `src/app/test-realtime/page.tsx` for demonstration and testing.
+</info added on 2025-09-10T01:08:59.209Z>
+
+## 4. Develop Notification Management System and Unread Count Display [done]
+### Dependencies: 13.2
+### Description: Create a dedicated UI component (e.g., a dropdown or a separate page) to list all notifications for the logged-in user. Implement functionality to mark notifications as read and display an unread notification count.
+### Details:
+Design a notification list component using `shadcn/ui` components (e.g., `Popover`, `Sheet`, `ScrollArea`, `Button`). Fetch all notifications for the current user from the `notifications` table, ordered by `created_at`. Implement an API endpoint or Supabase function to update the `read` status of a notification. Display a badge or icon with the count of unread notifications in the header/navbar.
+<info added on 2025-09-10T01:18:23.961Z>
+**Implementation Summary:**
+
+A complete notification management system has been developed, providing both a quick-access dropdown and a dedicated page for users.
+
+- **Notification Dropdown Component:**
+  - A new component, `src/components/notifications/notification-dropdown.tsx`, was created using `shadcn/ui`'s `Popover` for the dropdown, `ScrollArea` for the list, and `Badge` for the unread count.
+  - This component has been integrated into the main site navigation in `src/components/layout/header.tsx`, positioned next to the user avatar.
+  - It displays the count of unread notifications and provides functionality to mark individual or all notifications as read directly from the dropdown.
+
+- **Dedicated Notifications Page:**
+  - A full-featured notifications page was created at `src/app/notifications/page.tsx`.
+  - This page offers a comprehensive view of all user notifications, with options to filter between "All" and "Unread".
+  - It includes bulk actions like "Mark all as read" and displays detailed information for each notification, including timestamps.
+
+- **Core Functionality & Integration:**
+  - Both the dropdown and the dedicated page leverage the existing real-time hook (from subtask 13.3) to receive and display notifications instantly.
+  - Backend logic to update the `read` status in the `notifications` table for single or multiple entries has been implemented.
+  - For improved UX, notifications are color-coded based on their type (e.g., success, warning, error).
+</info added on 2025-09-10T01:18:23.961Z>
+
+## 5. Integrate Push Notification Service for Critical Updates [done]
+### Dependencies: 13.2
+### Description: Research and integrate a suitable push notification service (e.g., OneSignal, Firebase Cloud Messaging, or Supabase's native push capabilities if available) to send push notifications to user devices for critical real-time events like new cleaner assignments or urgent booking status changes.
+### Details:
+Select a push notification service and set up its SDK/API. Implement server-side logic (e.g., Supabase Edge Function or a backend service) that listens for specific critical `notifications` table inserts/updates (e.g., `type = 'cleaner_assigned'`). When a critical event occurs, trigger a push notification to the relevant user's registered device token. Implement client-side registration for push tokens.
+<info added on 2025-09-10T01:26:42.143Z>
+**Implementation Update:**
+
+The integration was completed using the standard Web Push API and the `web-push` library, rather than a third-party service.
+
+- **Database & Backend:** A new `push_subscriptions` table was created via migration (`supabase/migrations/20241210_create_push_subscriptions_table.sql`) to store user device subscription details, protected by RLS policies. Existing database triggers were updated to use `pg_notify` for critical events. This mechanism triggers a new API endpoint at `src/app/api/push-notifications/listen/route.ts`, which filters events and uses `src/app/api/push-notifications/send/route.ts` to dispatch notifications to the user's registered devices.
+
+- **Client-Side & UI:**
+  - A service worker was created at `public/sw.js` to handle incoming push events in the background.
+  - Client-side logic for registration, subscription management, and a React hook are centralized in `src/lib/push-notifications.ts`.
+  - A new UI component, `src/components/notifications/push-notification-settings.tsx`, allows users to toggle and test push notifications. This component has been integrated into the main user profile page at `src/app/profile/page.tsx`.
+</info added on 2025-09-10T01:26:42.143Z>
+

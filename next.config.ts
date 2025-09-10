@@ -1,27 +1,57 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      // Configure Turbopack to be more stable
-      resolveAlias: {
-        // Ensure proper module resolution
-        'react': require.resolve('react'),
-        'react-dom': require.resolve('react-dom'),
-      },
-    },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  
+  // Image optimization
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  // Ensure proper module resolution
-  resolve: {
-    alias: {
+
+  // Turbopack configuration (updated for Next.js 15)
+  turbopack: {
+    resolveAlias: {
       'react': require.resolve('react'),
       'react-dom': require.resolve('react-dom'),
     },
   },
-  // Add webpack configuration for better compatibility
+
+  // Webpack optimizations
   webpack: (config, { isServer, dev }) => {
+    // Production optimizations
+    if (!dev) {
+      // Enable tree shaking
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+      
+      // Optimize chunks
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
+      };
+    }
+
+    // Server-side fallbacks
     if (isServer && dev) {
-      // Add fallback for missing runtime modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -29,7 +59,58 @@ const nextConfig: NextConfig = {
         os: false,
       };
     }
+
     return config;
+  },
+
+  // Headers for caching and security
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+
+  // External packages for server components
+  serverExternalPackages: ['sharp'],
+  
+  // Experimental features for performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 };
 

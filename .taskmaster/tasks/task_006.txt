@@ -1,6 +1,6 @@
 # Task ID: 6
 # Title: Customer Landing Page with SEO Optimization
-# Status: pending
+# Status: done
 # Dependencies: 5
 # Priority: high
 # Description: Create the main landing page for customers with SEO optimization, structured data, and service discovery.
@@ -9,3 +9,35 @@ Build responsive landing page, implement SEO optimization (meta tags, structured
 
 # Test Strategy:
 Test page loading performance, verify SEO elements, check structured data validation, and ensure mobile responsiveness.
+
+# Subtasks:
+## 1. Implement Responsive Landing Page Structure [done]
+### Dependencies: None
+### Description: Create the foundational responsive layout for the customer landing page, including hero section, main content area, and footer.
+### Details:
+Develop `src/pages/index.tsx` to establish the primary layout. Utilize existing UI component patterns (e.g., `src/components/ui/Button.tsx`, `src/components/Layout.tsx`) and styling conventions (e.g., CSS Modules or Tailwind CSS if configured). Ensure mobile-first responsiveness.
+
+## 2. Integrate Core SEO Meta Tags [done]
+### Dependencies: 6.1
+### Description: Add essential meta tags to the landing page for improved search engine visibility and social sharing.
+### Details:
+Implement `next/head` within `src/pages/index.tsx` to include dynamic `title`, `description`, `keywords`, `og:title`, `og:description`, `og:image`, `twitter:card`, and `twitter:creator` meta tags. Ensure values are appropriate for the booking service.
+
+## 3. Implement Structured Data (JSON-LD) [done]
+### Dependencies: 6.2
+### Description: Embed structured data using JSON-LD to provide search engines with explicit information about the business and services.
+### Details:
+Add `<script type="application/ld+json">` tags within `next/head` in `src/pages/index.tsx`. Include relevant schema types such as `LocalBusiness`, `Service`, and `Organization` with appropriate properties (e.g., name, address, contact info, service offerings).
+
+## 4. Develop Service Browsing Interface [done]
+### Dependencies: 6.1
+### Description: Create a section on the landing page allowing customers to browse available cleaning services.
+### Details:
+Design and implement a UI component (e.g., `ServiceList.tsx`) within `src/pages/index.tsx` to display a list of services. Each service should have a title, description, and potentially an image. For initial implementation, use mock data or a static JSON file for service details.
+
+## 5. Generate Sitemap, Robots.txt & Add Call-to-Action Elements [done]
+### Dependencies: 6.1, 6.4
+### Description: Finalize technical SEO by creating sitemap and robots.txt, and integrate prominent call-to-action buttons.
+### Details:
+Create `public/sitemap.xml` and `public/robots.txt` files, ensuring they are correctly configured to allow search engine crawling of the landing page. Integrate clear and prominent call-to-action buttons (e.g., "Book Now", "View Services") in key areas of `src/pages/index.tsx`, linking to relevant sections or future booking flows.
+

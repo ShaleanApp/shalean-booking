@@ -86,12 +86,11 @@ export function ItemTable({
                     <span className="font-medium">${item.base_price.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{item.duration_minutes} min</span>
+                    <Tag className="h-4 w-4" />
+                    <span>Unit: {item.unit}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Tag className="h-4 w-4" />
-                    <span>{item.category?.name || 'Unknown Category'}</span>
+                    <span>Quantity: {item.min_quantity}-{item.max_quantity}</span>
                   </div>
                 </div>
                 
@@ -101,7 +100,7 @@ export function ItemTable({
                     Created {new Date(item.created_at).toLocaleDateString()}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>Order: {item.sort_order}</span>
+                    <span>Quantity-based: {item.is_quantity_based ? 'Yes' : 'No'}</span>
                   </div>
                 </div>
               </div>

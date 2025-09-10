@@ -8,9 +8,11 @@ const createItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   base_price: z.number().min(0, 'Base price must be non-negative'),
-  duration_minutes: z.number().min(1, 'Duration must be at least 1 minute'),
-  is_active: z.boolean().default(true),
-  sort_order: z.number().default(0)
+  unit: z.string().min(1, 'Unit is required'),
+  is_quantity_based: z.boolean().default(false),
+  min_quantity: z.number().min(1, 'Minimum quantity must be at least 1').default(1),
+  max_quantity: z.number().min(1, 'Maximum quantity must be at least 1').default(10),
+  is_active: z.boolean().default(true)
 })
 
 const updateItemSchema = createItemSchema.partial()
@@ -47,7 +49,6 @@ export async function GET(request: NextRequest) {
         *,
         category:service_categories(id, name, description)
       `)
-      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
 
     if (activeOnly) {

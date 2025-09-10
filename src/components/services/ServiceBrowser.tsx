@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Clock, DollarSign, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import { formatServicePrice } from '@/lib/currency'
 
 interface ServiceCategory {
   id: string
@@ -81,10 +82,7 @@ export function ServiceBrowser({ showAll = false, maxItems = 8 }: ServiceBrowser
   const displayItems = showAll ? filteredItems : filteredItems.slice(0, maxItems)
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price)
+    return formatServicePrice(price)
   }
 
   const formatDuration = (minutes: number) => {

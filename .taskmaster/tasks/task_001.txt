@@ -1,6 +1,6 @@
 # Task ID: 1
 # Title: Project Setup and Configuration
-# Status: pending
+# Status: done
 # Dependencies: None
 # Priority: high
 # Description: Set up the Next.js 15 project with TypeScript, TailwindCSS, shadcn/ui, and essential dependencies for Shalean Cleaning Services.

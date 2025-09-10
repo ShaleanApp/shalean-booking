@@ -96,7 +96,7 @@ export function ExtraTable({
                     Created {new Date(extra.created_at).toLocaleDateString()}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>Order: {extra.sort_order}</span>
+                    <span>Price: ${extra.price}</span>
                   </div>
                 </div>
               </div>

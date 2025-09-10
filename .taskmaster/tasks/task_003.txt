@@ -1,6 +1,6 @@
 # Task ID: 3
 # Title: Authentication System with Role-Based Access
-# Status: pending
+# Status: done
 # Dependencies: 2
 # Priority: high
 # Description: Implement Supabase Auth with role-based access control for customers, cleaners, and admins.
@@ -9,3 +9,146 @@ Set up Supabase Auth, create login/register forms, implement role-based routing 
 
 # Test Strategy:
 Test user registration, login, logout, role-based access, and verify that protected routes work correctly for customers, cleaners, and admins.
+
+# Subtasks:
+## 1. Configure Supabase Project and Integrate Client Libraries [done]
+### Dependencies: None
+### Description: Initialize a new Supabase project, configure environment variables, and integrate the Supabase client libraries (supabase-js, @supabase/auth-helpers-nextjs) into the Next.js application for both client and server-side operations.
+### Details:
+Set up a new Supabase project in the Supabase dashboard. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env.local`. Create `src/lib/supabase/client.ts` and `src/lib/supabase/server.ts` for Supabase client instances. Install `@supabase/supabase-js` and `@supabase/auth-helpers-nextjs`.
+<info added on 2025-09-09T20:21:31.446Z>
+### Implementation Plan for Login/Registration UI
+
+Based on the established Supabase client/server structure and the project's plan to use `shadcn/ui` (Task 4), the next steps are to create the user-facing authentication pages.
+
+1.  **Create Authentication Routes:**
+    *   Set up the necessary page files for login and registration. A good practice is to group them. Create the following files:
+        *   `src/app/login/page.tsx`
+        *   `src/app/register/page.tsx` (This can often be handled by the same component as login).
+
+2.  **Develop the Auth UI Component:**
+    *   Create a new client component, e.g., `src/components/auth/AuthForm.tsx`. This component will encapsulate the authentication logic.
+    *   Inside `AuthForm.tsx`, import the Supabase browser client: `import { createClient } from '@/lib/supabase/client';`.
+    *   Utilize the pre-installed `@supabase/auth-ui-react` library for a quick and robust implementation. Import the `Auth` component from it.
+
+3.  **Integrate and Style with shadcn/ui:**
+    *   In your `login/page.tsx`, render the `AuthForm` component.
+    *   To ensure the form's appearance aligns with the project's `shadcn/ui` theme, wrap the Supabase `Auth` component within `shadcn/ui` components like `Card`, `CardHeader`, `CardTitle`, and `CardContent`.
+    *   Configure the `Auth` component's `appearance` prop to use the TailwindCSS theme (`theme: ThemeSupa`), which will make it easier to style consistently with the rest of the application.
+
+**Example Implementation Snippet for `src/components/auth/AuthForm.tsx`:**
+
+```tsx
+'use client';
+
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { createClient } from '@/lib/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+export default function AuthForm() {
+  const supabase = createClient();
+
+  return (
+    <Card className="mx-auto max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Login</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ theme: ThemeSupa }}
+          providers={['google']} // Optional: Add social providers
+          redirectTo={`${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+```
+</info added on 2025-09-09T20:21:31.446Z>
+
+## 2. Develop Login and Registration User Interfaces [done]
+### Dependencies: 3.1
+### Description: Create responsive login and registration forms that interact with Supabase Auth for user sign-up and sign-in. Include basic form validation and error handling.
+### Details:
+Create `src/app/auth/login/page.tsx` and `src/app/auth/register/page.tsx`. Implement form submission logic using Supabase `signInWithPassword` and `signUp` methods. Handle success/error states and redirect users upon successful authentication.
+<info added on 2025-09-09T20:22:49.243Z>
+**Implementation Summary:**
+
+This subtask was completed by integrating the `@supabase/auth-ui-react` library, providing a pre-built authentication component instead of creating manual forms. This approach accelerated development while including robust features like social logins and built-in validation.
+
+**Key Implementation Details:**
+
+*   **Component Usage:** The primary implementation in `src/app/auth/login/page.tsx` and `src/app/auth/register/page.tsx` utilizes the `<Auth />` component from `@supabase/auth-ui-react`. This component is passed the Supabase client instance from `@/lib/supabase/client.ts` (created in subtask 3.1).
+*   **UI & Theming:** The auth forms are wrapped in `Card` components from `shadcn/ui` for layout consistency. The `<Auth />` component itself is styled using `ThemeSupa` from `@supabase/auth-ui-shared`, customized with the project's brand colors.
+*   **Authentication Flow:**
+    *   Social authentication for Google and GitHub is enabled via the `providers` prop.
+    *   A new callback route, `src/app/auth/callback/page.tsx`, was created to handle the server-side code exchange after an OAuth or email link sign-in.
+    *   The `redirectTo` prop on the `<Auth />` component is configured to use this callback route, which finalizes the session and redirects the user to the dashboard.
+*   **Supporting Pages:** An `src/app/unauthorized/page.tsx` was also created to provide a clear access-denied page for users.
+</info added on 2025-09-09T20:22:49.243Z>
+
+## 3. Establish User Profile Management and Role Assignment [done]
+### Dependencies: 3.2
+### Description: Implement functionality to manage user profiles (e.g., name, email) and assign roles (customer, cleaner, admin) upon registration or via an admin interface. Store roles in a Supabase `public.profiles` table.
+### Details:
+Create a `public.profiles` table in Supabase with columns like `id` (FK to `auth.users`), `role` (enum: 'customer', 'cleaner', 'admin'), and other profile fields. Implement a Supabase trigger or RLS policy to set a default 'customer' role on new user signup. Create a basic profile display page at `src/app/profile/page.tsx`.
+<info added on 2025-09-09T20:24:57.200Z>
+**Implementation Update:**
+
+*   **Profile Management UI:** A complete profile management page has been created at `src/app/profile/page.tsx`. It allows users to view and edit their `full_name` and `phone` number, leveraging `shadcn/ui` components for the interface.
+*   **Profile State Management:** A custom hook, `src/hooks/useProfile.ts`, was developed to fetch, manage, and update user profile data from the `profiles` table in real-time, reacting to Supabase auth state changes.
+*   **Component-Level RBAC:** Role-based access control has been implemented at the component level. This includes a generic `src/components/auth/RoleGuard.tsx` and specialized wrapper components like `AdminOnly`, `CleanerOnly`, and `CustomerOnly` to conditionally render UI elements based on the user's role.
+*   **Database Integration:** The implementation successfully utilizes the existing `handle_new_user()` trigger in Supabase, which automatically creates a profile with a default 'customer' role upon new user signup.
+*   **Dashboard Differentiation:** The main dashboard now displays different content based on the logged-in user's role, making use of the new role-based components.
+
+**Note:** The user has indicated that the work for the next subtask, 3.4 (Implement Role-Based Access Control Middleware), may have already been completed as part of subtask 3.1, which established protected routes. This should be verified before proceeding.
+</info added on 2025-09-09T20:24:57.200Z>
+
+## 4. Implement Role-Based Access Control Middleware [done]
+### Dependencies: 3.3
+### Description: Develop a Next.js middleware (`middleware.ts`) to intercept requests and enforce role-based access control, redirecting unauthorized users based on their assigned roles.
+### Details:
+Create `src/middleware.ts`. Use Supabase auth helpers to get the user session and retrieve the user's role from the `public.profiles` table. Define protected routes (e.g., `/admin`, `/cleaner`) and their required roles. Redirect users without the necessary role to a login page or an access denied page.
+<info added on 2025-09-09T20:25:36.330Z>
+Codebase analysis confirms the user's report. The file `src/middleware.ts` is present and fully implements the required role-based access control logic.
+
+**Analysis Details:**
+- **File:** `src/middleware.ts`
+- **Implementation:** The middleware leverages `@supabase/auth-helpers-nextjs` by using `createMiddlewareClient` to instantiate a Supabase client and retrieve the user's session.
+- **Pattern:** A `const` object maps protected route prefixes (e.g., `/admin`, `/cleaner`, `/dashboard`) to their required role(s).
+- **Logic:**
+    1. It intercepts requests and checks if the `pathname` matches a protected route.
+    2. If a session does not exist for a protected route, it redirects to `/auth/login`.
+    3. If a session exists, it queries the `public.profiles` table to get the user's `role`.
+    4. It validates the user's role against the required roles for the path. If the role is invalid, it redirects to an `/unauthorized` page.
+- **Configuration:** The `config.matcher` in `src/middleware.ts` is correctly configured to exclude static assets and public routes, ensuring the middleware only runs on necessary application pages.
+
+This existing implementation fully satisfies the requirements of this subtask.
+</info added on 2025-09-09T20:25:36.330Z>
+
+## 5. Apply Protected Route Guards and Role-Specific UI Elements [done]
+### Dependencies: 3.4
+### Description: Apply the implemented role-based access control to specific application routes and conditionally render UI elements based on the authenticated user's role.
+### Details:
+Update relevant page components (e.g., `src/app/admin/page.tsx`, `src/app/cleaner/page.tsx`, `src/app/customer/page.tsx`) to be protected by the middleware. Implement conditional rendering in navigation menus, dashboards, or other UI components to show/hide features based on the logged-in user's role.
+<info added on 2025-09-09T20:28:20.710Z>
+**Implementation Summary:**
+
+The `src/components/layout/header.tsx` component has been significantly updated to provide role-aware navigation. It now conditionally renders UI based on authentication status and user role, leveraging the `useProfile` hook for real-time user data.
+
+-   **Role-Specific Navigation:**
+    -   A user profile dropdown menu now displays the user's name, avatar, and a color-coded role badge (red for admin, blue for cleaner, green for customer).
+    -   Links to the Admin (`/admin`) and Cleaner (`/cleaner`) dashboards are conditionally shown in the navigation and dropdown menu based on the user's role.
+    -   Logout functionality with session cleanup has been implemented.
+
+-   **Dashboard Implementation:**
+    -   The `src/app/admin/page.tsx` dashboard has been built out with components for system stats, user management, and activity monitoring.
+    -   The `src/app/cleaner/page.tsx` dashboard includes features for managing job schedules, tracking earnings, and viewing reviews.
+    -   These pages, along with the customer dashboard, are protected by both the server-side middleware (from subtask 3.4) and client-side `RoleGuard` components (from subtask 3.3) to prevent unauthorized access.
+
+-   **UI Enhancements:**
+    -   Reusable UI elements like role-specific icons and badges have been created using shadcn/ui and Tailwind CSS, ensuring a consistent design.
+</info added on 2025-09-09T20:28:20.710Z>
+

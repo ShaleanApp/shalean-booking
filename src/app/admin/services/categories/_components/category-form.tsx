@@ -24,8 +24,8 @@ const categorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   icon: z.string().max(50, 'Icon must be less than 50 characters').optional(),
-  is_active: z.boolean().default(true),
-  sort_order: z.number().min(0, 'Sort order must be non-negative').default(0)
+  is_active: z.boolean(),
+  sort_order: z.number().min(0, 'Sort order must be non-negative')
 })
 
 type CategoryFormData = z.infer<typeof categorySchema>
@@ -93,7 +93,12 @@ export function CategoryForm({
   }, [isOpen, category, reset])
 
   const handleFormSubmit = (data: CategoryFormData) => {
-    onSubmit(data)
+    const transformedData = {
+      ...data,
+      description: data.description || null,
+      icon: data.icon || null
+    }
+    onSubmit(transformedData)
   }
 
   const handleClose = () => {

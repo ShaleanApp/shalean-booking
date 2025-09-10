@@ -4,7 +4,7 @@ import { BookingFormData } from '@/types'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookingId = params.id
+    const { id: bookingId } = await params
     const body = await req.json()
     const { formData }: { formData: Partial<BookingFormData> } = body
 

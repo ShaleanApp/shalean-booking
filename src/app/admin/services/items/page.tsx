@@ -66,7 +66,10 @@ export default function ServiceItemsPage() {
 
   const handleCreateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
     try {
-      await createItem.mutateAsync(data)
+      await createItem.mutateAsync({
+        ...data,
+        description: data.description || undefined
+      })
       setIsFormOpen(false)
     } catch (error) {
       console.error('Error creating item:', error)

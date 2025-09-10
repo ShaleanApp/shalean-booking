@@ -8,7 +8,12 @@ import { useBooking } from '@/contexts/BookingContext'
 import { PaystackPayment } from '@/components/payment/PaystackPayment'
 import { createClient } from '@/lib/supabase/client'
 import { nairaToKobo, formatCurrency } from '@/lib/payment'
+import { formatTotalAmount } from '@/lib/currency'
 import { CreditCard, Shield, CheckCircle, Loader2 } from 'lucide-react'
+import { ServiceItem, ServiceExtra } from '@/types'
+import { LoadingState, RetryButton } from '@/components/shared/LoadingState'
+import { useToast } from '@/components/shared/Toast'
+import { safeApiCall, createErrorHandler } from '@/lib/error-handling'
 
 export function PaymentStep() {
   const { state, clearDraft } = useBooking()
@@ -16,7 +21,74 @@ export function PaymentStep() {
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
   const [bookingData, setBookingData] = useState<{ id: string; reference: string } | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [services, setServices] = useState<ServiceItem[]>([])
+  const [extras, setExtras] = useState<ServiceExtra[]>([])
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+  const [retrying, setRetrying] = useState(false)
   const router = useRouter()
+  
+  const toast = useToast()
+  const errorHandler = createErrorHandler()
+
+  // Fetch service and extra data
+  useEffect(() => {
+    fetchServiceData()
+  }, [])
+
+  const fetchServiceData = async () => {
+    setLoading(true)
+    setFetchError(null)
+
+    try {
+      const supabase = createClient()
+      
+      // Fetch service items
+      const servicesResult = await safeApiCall(async () => {
+        const { data, error } = await supabase
+          .from('service_items')
+          .select('*')
+          .eq('is_active', true)
+        
+        if (error) throw error
+        return data
+      })
+
+      if (!servicesResult.success) {
+        throw new Error(servicesResult.error?.message || 'Failed to fetch services')
+      }
+
+      // Fetch service extras
+      const extrasResult = await safeApiCall(async () => {
+        const { data, error } = await supabase
+          .from('service_extras')
+          .select('*')
+          .eq('is_active', true)
+        
+        if (error) throw error
+        return data
+      })
+
+      if (!extrasResult.success) {
+        throw new Error(extrasResult.error?.message || 'Failed to fetch extras')
+      }
+
+      setServices(servicesResult.data || [])
+      setExtras(extrasResult.data || [])
+    } catch (error) {
+      const errorMessage = errorHandler.handleError(error, 'Payment Data')
+      setFetchError(errorMessage)
+      toast.error('Failed to load payment data', errorMessage)
+    } finally {
+      setLoading(false)
+      setRetrying(false)
+    }
+  }
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    await fetchServiceData()
+  }
 
   // Calculate total amount
   const calculateTotal = () => {
@@ -24,16 +96,18 @@ export function PaymentStep() {
 
     // Calculate services total
     state.formData.services.forEach(serviceData => {
-      // This would need to fetch service details from Supabase
-      // For now, using a placeholder calculation
-      total += 50 * serviceData.quantity // Placeholder price
+      const service = services.find(s => s.id === serviceData.service_item_id)
+      if (service) {
+        total += service.base_price * serviceData.quantity
+      }
     })
 
     // Calculate extras total
     state.formData.extras.forEach(extraData => {
-      // This would need to fetch extra details from Supabase
-      // For now, using a placeholder calculation
-      total += 25 * extraData.quantity // Placeholder price
+      const extra = extras.find(e => e.id === extraData.service_extra_id)
+      if (extra) {
+        total += extra.price * extraData.quantity
+      }
     })
 
     return total
@@ -43,7 +117,7 @@ export function PaymentStep() {
     setIsCreatingBooking(true)
     setErrorMessage('')
 
-    try {
+    const result = await safeApiCall(async () => {
       const response = await fetch('/api/bookings/create', {
         method: 'POST',
         headers: {
@@ -61,19 +135,28 @@ export function PaymentStep() {
         throw new Error(data.message || 'Failed to create booking')
       }
 
+      return data
+    }, {
+      retry: true,
+      maxRetries: 2,
+      onError: (error) => {
+        toast.error('Booking Creation Failed', error.message)
+      }
+    })
+
+    if (result.success) {
       setBookingData({
-        id: data.booking.id,
-        reference: data.booking.payment_reference
+        id: result.data.booking.id,
+        reference: result.data.booking.payment_reference
       })
       setPaymentStatus('processing')
-
-    } catch (error) {
-      console.error('Booking creation error:', error)
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create booking')
+      toast.success('Booking Created Successfully!', 'Your booking has been created and is ready for payment.')
+    } else {
+      setErrorMessage(result.error?.message || 'Failed to create booking')
       setPaymentStatus('error')
-    } finally {
-      setIsCreatingBooking(false)
     }
+
+    setIsCreatingBooking(false)
   }
 
   const handlePaymentSuccess = (response: any) => {
@@ -111,6 +194,27 @@ export function PaymentStep() {
     }
     getUserEmail()
   }, [])
+
+  if (loading) {
+    return (
+      <LoadingState 
+        message="Loading payment information..." 
+        variant="card"
+      />
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RetryButton 
+          onRetry={handleRetry}
+          loading={retrying}
+          error={fetchError}
+        />
+      </div>
+    )
+  }
 
   if (paymentStatus === 'success') {
     return (
@@ -218,7 +322,7 @@ export function PaymentStep() {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>{formatCurrency(calculateTotal())}</span>
+              <span>{formatTotalAmount(calculateTotal())}</span>
             </div>
             <div className="flex justify-between">
               <span>Tax</span>
@@ -226,7 +330,7 @@ export function PaymentStep() {
             </div>
             <div className="flex justify-between font-semibold text-lg border-t pt-2">
               <span>Total</span>
-              <span>{formatCurrency(calculateTotal())}</span>
+              <span>{formatTotalAmount(calculateTotal())}</span>
             </div>
           </div>
         </CardContent>

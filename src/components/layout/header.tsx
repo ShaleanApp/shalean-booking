@@ -23,7 +23,8 @@ import {
   Calendar,
   Shield,
   Wrench,
-  BookOpen
+  BookOpen,
+  Bell
 } from 'lucide-react'
 
 export function Header() {
