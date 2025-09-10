@@ -76,7 +76,7 @@ export default function ServiceItemsPage() {
     }
   }
 
-  const handleUpdateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
+  const handleUpdateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined }) => {
     if (!editingItem) return
     
     try {
