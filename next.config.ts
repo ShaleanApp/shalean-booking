@@ -85,6 +85,8 @@ const nextConfig: NextConfig = {
           'typeof self': JSON.stringify('undefined'),
           'typeof window': JSON.stringify('undefined'),
           'typeof global': JSON.stringify('undefined'),
+          'self': 'undefined',
+          'window': 'undefined',
         })
       );
     }

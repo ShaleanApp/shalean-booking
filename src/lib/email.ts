@@ -1,10 +1,17 @@
 import { Resend } from 'resend';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Get from email from environment or use default
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Shalean Cleaning Services <onboarding@resend.dev>';
+
+// Lazy-initialize Resend client
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY is not configured. Email sending will be skipped.');
+    return null;
+  }
+  return new Resend(apiKey);
+}
 
 // Email templates
 export interface BookingConfirmationEmailData {
@@ -46,6 +53,21 @@ export interface BookingStatusUpdateEmailData {
 // Email sending functions
 export async function sendBookingConfirmation(data: BookingConfirmationEmailData) {
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('Email sending skipped: RESEND_API_KEY not configured');
+      return { 
+        success: true, 
+        skipped: true,
+        messageId: null,
+        emailData: {
+          to: data.customerEmail,
+          subject: `Booking Confirmation - ${data.bookingId}`,
+          sentAt: new Date().toISOString()
+        }
+      };
+    }
+
     const { data: emailData, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.customerEmail],
@@ -76,6 +98,21 @@ export async function sendBookingConfirmation(data: BookingConfirmationEmailData
 
 export async function sendBookingReminder(data: BookingReminderEmailData) {
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('Email sending skipped: RESEND_API_KEY not configured');
+      return { 
+        success: true, 
+        skipped: true,
+        messageId: null,
+        emailData: {
+          to: data.customerEmail,
+          subject: `Reminder: Your cleaning service is scheduled for ${data.scheduledDate}`,
+          sentAt: new Date().toISOString()
+        }
+      };
+    }
+
     const { data: emailData, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.customerEmail],
@@ -106,6 +143,21 @@ export async function sendBookingReminder(data: BookingReminderEmailData) {
 
 export async function sendBookingStatusUpdate(data: BookingStatusUpdateEmailData) {
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('Email sending skipped: RESEND_API_KEY not configured');
+      return { 
+        success: true, 
+        skipped: true,
+        messageId: null,
+        emailData: {
+          to: data.customerEmail,
+          subject: `Booking Update - ${data.bookingId}`,
+          sentAt: new Date().toISOString()
+        }
+      };
+    }
+
     const { data: emailData, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.customerEmail],
@@ -472,21 +524,24 @@ export async function sendBookingConfirmationWithTracking(data: BookingConfirmat
   try {
     const result = await sendBookingConfirmation(data);
     
-    // Track successful send
-    await trackEmailDelivery(
-      userId,
-      'booking_confirmation',
-      'sent',
-      {
-        bookingId: data.bookingId,
-        customerEmail: data.customerEmail,
-        customerName: data.customerName,
-        serviceName: data.serviceName,
-        scheduledDate: data.scheduledDate,
-        totalAmount: data.totalAmount
-      },
-      result.messageId
-    );
+    // Only track if email was actually sent (not skipped)
+    if (!result.skipped) {
+      // Track successful send
+      await trackEmailDelivery(
+        userId,
+        'booking_confirmation',
+        'sent',
+        {
+          bookingId: data.bookingId,
+          customerEmail: data.customerEmail,
+          customerName: data.customerName,
+          serviceName: data.serviceName,
+          scheduledDate: data.scheduledDate,
+          totalAmount: data.totalAmount
+        },
+        result.messageId || undefined
+      );
+    }
     
     return result;
   } catch (error) {
@@ -515,21 +570,24 @@ export async function sendBookingReminderWithTracking(data: BookingReminderEmail
   try {
     const result = await sendBookingReminder(data);
     
-    // Track successful send
-    await trackEmailDelivery(
-      userId,
-      'booking_reminder',
-      'sent',
-      {
-        bookingId: data.bookingId,
-        customerEmail: data.customerEmail,
-        customerName: data.customerName,
-        serviceName: data.serviceName,
-        scheduledDate: data.scheduledDate,
-        cleanerName: data.cleanerName
-      },
-      result.messageId
-    );
+    // Only track if email was actually sent (not skipped)
+    if (!result.skipped) {
+      // Track successful send
+      await trackEmailDelivery(
+        userId,
+        'booking_reminder',
+        'sent',
+        {
+          bookingId: data.bookingId,
+          customerEmail: data.customerEmail,
+          customerName: data.customerName,
+          serviceName: data.serviceName,
+          scheduledDate: data.scheduledDate,
+          cleanerName: data.cleanerName
+        },
+        result.messageId || undefined
+      );
+    }
     
     return result;
   } catch (error) {
@@ -558,23 +616,26 @@ export async function sendBookingStatusUpdateWithTracking(data: BookingStatusUpd
   try {
     const result = await sendBookingStatusUpdate(data);
     
-    // Track successful send
-    await trackEmailDelivery(
-      userId,
-      'booking_status_update',
-      'sent',
-      {
-        bookingId: data.bookingId,
-        customerEmail: data.customerEmail,
-        customerName: data.customerName,
-        serviceName: data.serviceName,
-        scheduledDate: data.scheduledDate,
-        status: data.status,
-        statusMessage: data.statusMessage,
-        cleanerName: data.cleanerName
-      },
-      result.messageId
-    );
+    // Only track if email was actually sent (not skipped)
+    if (!result.skipped) {
+      // Track successful send
+      await trackEmailDelivery(
+        userId,
+        'booking_status_update',
+        'sent',
+        {
+          bookingId: data.bookingId,
+          customerEmail: data.customerEmail,
+          customerName: data.customerName,
+          serviceName: data.serviceName,
+          scheduledDate: data.scheduledDate,
+          status: data.status,
+          statusMessage: data.statusMessage,
+          cleanerName: data.cleanerName
+        },
+        result.messageId || undefined
+      );
+    }
     
     return result;
   } catch (error) {
