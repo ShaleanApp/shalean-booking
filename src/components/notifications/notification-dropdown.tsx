@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,43 +30,116 @@ interface Notification {
   read: boolean
 }
 
-export function NotificationDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
+// Helper function to normalize errors for meaningful logging
+function normalizeError(err: unknown) {
+  if (err instanceof Error) {
+    return { name: err.name, message: err.message, stack: err.stack }
+  }
+  if (err && typeof err === 'object') {
+    const anyErr = err as any
+    return {
+      message: anyErr.message ?? String(anyErr),
+      code: anyErr.code,
+      details: anyErr.details,
+      hint: anyErr.hint,
+    }
+  }
+  return { message: String(err) }
+}
+
+// Custom hook for notifications with proper error handling
+function useNotifications(userId?: string) {
+  const [items, setItems] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const supabase = useMemo(() => {
+    try {
+      return createSupabaseBrowser()
+    } catch (err) {
+      console.warn('Failed to create Supabase client:', normalizeError(err))
+      return null
+    }
+  }, [])
+
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true)
+    setErrorMsg(null)
+
+    try {
+      if (!userId) {
+        // Skip querying until we actually know who to fetch for
+        setItems([])
+        return
+      }
+      if (!supabase) {
+        // Guard missing Supabase client
+        setItems([])
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+
+      setItems(Array.isArray(data) ? data : [])
+    } catch (err) {
+      const pretty = normalizeError(err)
+      setErrorMsg(pretty.message ?? 'Unknown error')
+      console.error('Error fetching notifications:', pretty) // ✅ meaningful, not {}
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, userId])
+
+  // Helper function to update a single notification
+  const updateNotification = useCallback((notificationId: string, updates: Partial<Notification>) => {
+    setItems(prev =>
+      prev.map(notification =>
+        notification.id === notificationId
+          ? { ...notification, ...updates }
+          : notification
+      )
+    )
+  }, [])
+
+  // Helper function to update all notifications
+  const updateAllNotifications = useCallback((updates: Partial<Notification>) => {
+    setItems(prev =>
+      prev.map(notification => ({ ...notification, ...updates }))
+    )
+  }, [])
+
+  return { items, loading, errorMsg, fetchNotifications, updateNotification, updateAllNotifications }
+}
+
+export function NotificationDropdown() {
   const [markingAsRead, setMarkingAsRead] = useState<string | null>(null)
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false)
   
   const { user } = useProfile()
-  const supabase = createSupabaseBrowser()
-
-  // Fetch notifications from database
-  const fetchNotifications = async () => {
-    if (!user) return
-
+  const { items: notifications, loading, errorMsg, fetchNotifications, updateNotification, updateAllNotifications } = useNotifications(user?.id)
+  const supabase = useMemo(() => {
     try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50)
-
-      if (error) {
-        console.error('Error fetching notifications:', error)
-        return
-      }
-
-      setNotifications(data || [])
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
-    } finally {
-      setLoading(false)
+      return createSupabaseBrowser()
+    } catch (err) {
+      console.warn('Failed to create Supabase client:', normalizeError(err))
+      return null
     }
-  }
+  }, [])
 
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {
+    if (!supabase) {
+      console.warn('Supabase client not available for marking notification as read')
+      return
+    }
+
     try {
       setMarkingAsRead(notificationId)
       const { error } = await supabase
@@ -75,20 +148,16 @@ export function NotificationDropdown() {
         .eq('id', notificationId)
 
       if (error) {
-        console.error('Error marking notification as read:', error)
+        const pretty = normalizeError(error)
+        console.error('Error marking notification as read:', pretty)
         return
       }
 
       // Update local state
-      setNotifications(prev =>
-        prev.map(notification =>
-          notification.id === notificationId
-            ? { ...notification, read: true }
-            : notification
-        )
-      )
-    } catch (error) {
-      console.error('Error marking notification as read:', error)
+      updateNotification(notificationId, { read: true })
+    } catch (err) {
+      const pretty = normalizeError(err)
+      console.error('Error marking notification as read:', pretty)
     } finally {
       setMarkingAsRead(null)
     }
@@ -96,7 +165,7 @@ export function NotificationDropdown() {
 
   // Mark all notifications as read
   const markAllAsRead = async () => {
-    if (!user) return
+    if (!user || !supabase) return
 
     try {
       setMarkingAllAsRead(true)
@@ -107,16 +176,16 @@ export function NotificationDropdown() {
         .eq('read', false)
 
       if (error) {
-        console.error('Error marking all notifications as read:', error)
+        const pretty = normalizeError(error)
+        console.error('Error marking all notifications as read:', pretty)
         return
       }
 
       // Update local state
-      setNotifications(prev =>
-        prev.map(notification => ({ ...notification, read: true }))
-      )
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error)
+      updateAllNotifications({ read: true })
+    } catch (err) {
+      const pretty = normalizeError(err)
+      console.error('Error marking all notifications as read:', pretty)
     } finally {
       setMarkingAllAsRead(false)
     }
@@ -204,15 +273,13 @@ export function NotificationDropdown() {
     }
   }
 
-  // Calculate unread count
-  const unreadCount = notifications.filter(n => !n.read).length
+  // Calculate unread count with safe array handling
+  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.read).length : 0
 
   // Fetch notifications on mount
   useEffect(() => {
-    if (user) {
-      fetchNotifications()
-    }
-  }, [user])
+    fetchNotifications()
+  }, [fetchNotifications])
 
   if (!user) {
     return null
@@ -259,7 +326,13 @@ export function NotificationDropdown() {
             <div className="flex items-center justify-center p-8">
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
-          ) : notifications.length === 0 ? (
+          ) : errorMsg ? (
+            <div className="flex flex-col items-center justify-center p-8 text-destructive">
+              <Bell className="h-8 w-8 mb-2" />
+              <p className="text-sm">Error loading notifications</p>
+              <p className="text-xs text-muted-foreground mt-1">{errorMsg}</p>
+            </div>
+          ) : !Array.isArray(notifications) || notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
               <Bell className="h-8 w-8 mb-2" />
               <p className="text-sm">No notifications yet</p>
