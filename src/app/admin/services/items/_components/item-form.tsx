@@ -44,7 +44,7 @@ type ItemFormData = z.infer<typeof itemSchema>
 interface ItemFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => void
+  onSubmit: (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined }) => void
   item?: ServiceItem | null
   categories: ServiceCategory[]
   isSubmitting: boolean
@@ -119,10 +119,11 @@ export function ItemForm({
   }, [isOpen, item, reset])
 
   const handleFormSubmit = (data: ItemFormData) => {
+    const { description, ...restData } = data
     onSubmit({
-      ...data,
-      description: data.description || null
-    })
+      ...restData,
+      description: description || undefined
+    } as Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined })
   }
 
   const handleClose = () => {
