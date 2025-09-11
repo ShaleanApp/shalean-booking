@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
               
               await sendBookingStatusUpdate({
                 customerName: booking.profiles.full_name || 'Customer',
+                customerEmail: booking.profiles.email,
                 bookingId: booking.id,
                 serviceName: booking.booking_services[0]?.service_items.name || 'Cleaning Service',
                 scheduledDate: scheduledDate.toLocaleDateString('en-NG', {

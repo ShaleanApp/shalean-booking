@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get booking details from database
-    const supabase = createClient();
+    const supabase = await createClient();
     
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+// import { Switch } from '@/components/ui/switch' // Removed - not used
 import { 
   Users, 
   Search, 
@@ -17,9 +17,9 @@ import {
   Phone, 
   Calendar,
   MoreHorizontal,
-  UserCheck,
+  // UserCheck, // Removed - not used
   DollarSign,
-  UserX,
+  // UserX, // Removed - not used
   Eye,
   Edit,
   Trash2
@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  // const [statusFilter, setStatusFilter] = useState<string>('all') // Removed - is_active field doesn't exist in profiles table
 
   const supabase = createClient()
 
@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     filterUsers()
-  }, [users, searchTerm, roleFilter, statusFilter])
+  }, [users, searchTerm, roleFilter])
 
   const fetchUsers = async () => {
     try {
@@ -179,32 +179,15 @@ export default function AdminUsersPage() {
       filtered = filtered.filter(user => user.role === roleFilter)
     }
 
-    // Status filter (active/inactive based on recent activity)
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(user => {
-        const isActive = user.stats?.total_bookings && user.stats.total_bookings > 0
-        return statusFilter === 'active' ? isActive : !isActive
-      })
-    }
+    // Status filter removed - was using booking activity, not is_active field
 
     setFilteredUsers(filtered)
   }
 
-  const toggleUserStatus = async (userId: string, isActive: boolean) => {
-    try {
-      // This would update a status field in the profiles table
-      // For now, we'll just update the local state
-      setUsers(prev => 
-        prev.map(user => 
-          user.id === userId 
-            ? { ...user, is_active: isActive }
-            : user
-        )
-      )
-    } catch (error) {
-      console.error('Error updating user status:', error)
-    }
-  }
+  // const toggleUserStatus = async (userId: string, isActive: boolean) => {
+  //   // Removed - is_active field doesn't exist in profiles table
+  //   // This functionality would require adding is_active field to profiles table
+  // }
 
   const deleteUser = async (userId: string) => {
     try {
@@ -307,16 +290,7 @@ export default function AdminUsersPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Status filter removed - was using booking activity, not is_active field */}
 
               <Button onClick={fetchUsers} variant="outline">
                 <Filter className="mr-2 h-4 w-4" />
@@ -359,15 +333,7 @@ export default function AdminUsersPage() {
                             <Badge className={getRoleColor(user.role)}>
                               {user.role}
                             </Badge>
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                checked={user.is_active !== false}
-                                onCheckedChange={(checked) => toggleUserStatus(user.id, checked)}
-                              />
-                              <span className="text-sm text-gray-600">
-                                {user.is_active !== false ? 'Active' : 'Inactive'}
-                              </span>
-                            </div>
+                            {/* User status toggle removed - is_active field doesn't exist in profiles table */}
                           </div>
                         </div>
                       </div>
@@ -445,30 +411,13 @@ export default function AdminUsersPage() {
                             Edit User
                           </DropdownMenuItem>
                           {user.role !== 'admin' && (
-                            <>
-                              <DropdownMenuItem 
-                                onClick={() => toggleUserStatus(user.id, !user.is_active)}
-                              >
-                                {user.is_active ? (
-                                  <>
-                                    <UserX className="mr-2 h-4 w-4" />
-                                    Deactivate
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                    Activate
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => deleteUser(user.id)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete User
-                              </DropdownMenuItem>
-                            </>
+                            <DropdownMenuItem 
+                              onClick={() => deleteUser(user.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete User
+                            </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>

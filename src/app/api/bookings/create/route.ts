@@ -206,6 +206,7 @@ export async function POST(req: NextRequest) {
         
         await sendBookingConfirmation({
           customerName: profile.full_name || 'Customer',
+          customerEmail: profile.email,
           bookingId: booking.id,
           serviceName: serviceItems[0]?.service_item_id ? 'Cleaning Service' : 'Multiple Services',
           scheduledDate: scheduledDate.toLocaleDateString('en-NG', {
