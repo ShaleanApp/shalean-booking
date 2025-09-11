@@ -65,14 +65,14 @@ class PushNotificationService {
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
+        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey) as BufferSource
       })
 
       // Save subscription to database
       await this.saveSubscription(subscription)
 
       console.log('Push notification subscription successful')
-      return subscription
+      return subscription as any
     } catch (error) {
       console.error('Error registering for push notifications:', error)
       return null
@@ -105,22 +105,12 @@ class PushNotificationService {
       icon: '/icon-192x192.png',
       badge: '/badge-72x72.png',
       tag: 'test-notification',
-      requireInteraction: true,
-      actions: [
-        {
-          action: 'view',
-          title: 'View Details'
-        },
-        {
-          action: 'dismiss',
-          title: 'Dismiss'
-        }
-      ]
+      requireInteraction: true
     })
   }
 
   // Save subscription to database
-  private async saveSubscription(subscription: PushSubscription): Promise<void> {
+  private async saveSubscription(subscription: any): Promise<void> {
     try {
       const { data: { user } } = await this.supabase.auth.getUser()
       if (!user) return
@@ -130,8 +120,8 @@ class PushNotificationService {
         .upsert({
           user_id: user.id,
           endpoint: subscription.endpoint,
-          p256dh_key: subscription.keys.p256dh,
-          auth_key: subscription.keys.auth,
+          p256dh_key: (subscription as any).keys?.p256dh,
+          auth_key: (subscription as any).keys?.auth,
           created_at: new Date().toISOString()
         })
 
@@ -144,7 +134,7 @@ class PushNotificationService {
   }
 
   // Remove subscription from database
-  private async removeSubscription(subscription: PushSubscription): Promise<void> {
+  private async removeSubscription(subscription: any): Promise<void> {
     try {
       const { data: { user } } = await this.supabase.auth.getUser()
       if (!user) return

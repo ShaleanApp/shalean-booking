@@ -304,7 +304,7 @@ export const ADDRESS_VALIDATION_RULES = {
     required: true,
     minLength: 2,
     maxLength: 50,
-    pattern: VALIDATION_RULES.ALPHA_ONLY,
+    pattern: VALIDATION_PATTERNS.ALPHA_ONLY,
     message: 'Please enter a valid country name'
   }
 } as const
@@ -320,7 +320,7 @@ export function useValidation<T extends Record<string, any>>(
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [touched, setTouched] = React.useState<Record<string, boolean>>({})
 
-  const validateField = React.useCallback((fieldName: keyof T, value: any) => {
+  const validateFieldLocal = React.useCallback((fieldName: keyof T, value: any) => {
     const fieldRules = rules[fieldName]
     if (!fieldRules) return
 
@@ -341,14 +341,14 @@ export function useValidation<T extends Record<string, any>>(
     setValues(prev => ({ ...prev, [fieldName]: value }))
     
     if (touched[fieldName as string]) {
-      validateField(fieldName, value)
+      validateFieldLocal(fieldName, value)
     }
-  }, [touched, validateField])
+  }, [touched, validateFieldLocal])
 
   const setTouchedField = React.useCallback((fieldName: keyof T) => {
     setTouched(prev => ({ ...prev, [fieldName]: true }))
-    validateField(fieldName, values[fieldName])
-  }, [values, validateField])
+    validateFieldLocal(fieldName, values[fieldName])
+  }, [values, validateFieldLocal])
 
   const reset = React.useCallback(() => {
     setValues(initialValues)
@@ -363,7 +363,7 @@ export function useValidation<T extends Record<string, any>>(
     isValid: Object.keys(errors).length === 0,
     setValue,
     setTouchedField,
-    validateField,
+    validateField: validateFieldLocal,
     validateAll,
     reset
   }

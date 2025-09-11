@@ -134,13 +134,15 @@ export function useCleanerJobs() {
           },
           quantity: bs.quantity
         })) || [],
-        extras: booking.booking_extras?.map(be => ({
-          service_extra: {
-            name: be.service_extras?.name || '',
-            description: be.service_extras?.description || '',
-            price: be.service_extras?.price || 0
-          }
-        })) || [],
+        extras: (booking.booking_extras ?? []).flatMap((be) =>
+          (be.service_extras ?? []).map((e) => ({
+            service_extra: {
+              name: e?.name ?? '',
+              description: e?.description ?? '',
+              price: e?.price ?? 0,
+            }
+          }))
+        ) || [],
         notes: booking.notes,
         rating: booking.rating,
         review: booking.review
