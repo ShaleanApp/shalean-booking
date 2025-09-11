@@ -55,7 +55,7 @@ function verifyWebhookSignature(body: string, signature: string | null): boolean
 }
 
 async function handlePaymentCompleted(data: any) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { payment_id, amount, currency, reference } = data
@@ -92,7 +92,7 @@ async function handlePaymentCompleted(data: any) {
 }
 
 async function handlePaymentFailed(data: any) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { payment_id, reason } = data
@@ -128,7 +128,7 @@ async function handlePaymentFailed(data: any) {
 }
 
 async function handlePaymentRefunded(data: any) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { payment_id, refund_amount, refund_reason } = data
@@ -166,7 +166,7 @@ async function handlePaymentRefunded(data: any) {
 }
 
 async function handlePaymentChargeback(data: any) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { payment_id, chargeback_reason } = data
