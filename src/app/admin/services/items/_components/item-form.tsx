@@ -117,7 +117,7 @@ export function ItemForm({
     const { description, ...restData } = data
     const formData = {
       ...restData,
-      description: description || null
+      description: description || undefined
     }
     onSubmit(formData as Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>)
   }
