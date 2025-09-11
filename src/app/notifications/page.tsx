@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,7 +44,7 @@ export default function NotificationsPage() {
   
   const { user } = useProfile()
   const { isConnected } = useRealtimeNotificationsWithToast()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   // Fetch notifications from database
   const fetchNotifications = async () => {

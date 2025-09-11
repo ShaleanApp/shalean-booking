@@ -1,6 +1,6 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,7 +9,7 @@ export default function AuthCallbackPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     const handleAuthCallback = async () => {

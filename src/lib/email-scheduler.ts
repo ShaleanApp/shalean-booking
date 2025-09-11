@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 import { sendBookingReminder, sendBookingStatusUpdate } from '@/lib/email';
 
 // Function to send reminder emails for bookings scheduled for tomorrow
 export async function sendReminderEmails() {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     // Get tomorrow's date
     const tomorrow = new Date();
@@ -97,7 +97,7 @@ export async function sendReminderEmails() {
 // Function to send status update emails when cleaner updates booking status
 export async function sendStatusUpdateEmail(bookingId: string, status: string, statusMessage: string, cleanerName?: string) {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     // Get booking details
     const { data: booking, error } = await supabase
@@ -167,7 +167,7 @@ export async function sendStatusUpdateEmail(bookingId: string, status: string, s
 // Function to get email delivery statistics
 export async function getEmailStats() {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     const { data: stats, error } = await supabase
       .from('notifications')

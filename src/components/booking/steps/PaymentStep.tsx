@@ -1,3 +1,5 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -6,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useBooking } from '@/contexts/BookingContext'
 import { PaystackPayment } from '@/components/payment/PaystackPayment'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { nairaToKobo, formatCurrency } from '@/lib/payment'
 import { formatTotalAmount } from '@/lib/currency'
 import { CreditCard, Shield, CheckCircle, Loader2 } from 'lucide-react'
@@ -41,7 +43,7 @@ export function PaymentStep() {
     setFetchError(null)
 
     try {
-      const supabase = createClient()
+      const supabase = createSupabaseBrowser()
       
       // Fetch service items
       const servicesResult = await safeApiCall(async () => {
@@ -188,7 +190,7 @@ export function PaymentStep() {
   
   useEffect(() => {
     const getUserEmail = async () => {
-      const supabase = createClient()
+      const supabase = createSupabaseBrowser()
       const { data: { user } } = await supabase.auth.getUser()
       setUserEmail(user?.email || '')
     }

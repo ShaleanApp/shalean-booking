@@ -36,7 +36,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Profile, BookingWithDetails } from '@/types'
 
 interface CleanerStats {
@@ -59,7 +59,7 @@ export default function AdminCleanersPage() {
   const [cleanerJobs, setCleanerJobs] = useState<BookingWithDetails[]>([])
   const [loadingJobs, setLoadingJobs] = useState(false)
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

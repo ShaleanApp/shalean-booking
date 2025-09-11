@@ -1,6 +1,8 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { sendStatusUpdateEmail } from '@/lib/email-scheduler';
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the user has permission to update this booking
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {

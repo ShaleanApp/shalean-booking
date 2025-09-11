@@ -43,7 +43,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { BookingWithDetails, BookingStatus, Profile } from '@/types'
 
 export default function AdminBookingsPage() {
@@ -65,7 +65,7 @@ export default function AdminBookingsPage() {
     special_instructions: ''
   })
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

@@ -1,12 +1,14 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { generatePaymentReference, nairaToKobo } from '@/lib/payment'
 import { BookingFormData } from '@/types'
 import { sendBookingConfirmation } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     // Get the current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/currency'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 
 interface DashboardStats {
   totalUsers: number
@@ -49,7 +49,7 @@ export default function AdminPage() {
   })
   const [loadingStats, setLoadingStats] = useState(true)
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

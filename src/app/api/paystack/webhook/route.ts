@@ -1,6 +1,8 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { sendBookingStatusUpdate } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
     console.log(`Received Paystack webhook: ${eventType} for reference: ${transactionReference}`)
 
     // 3. Initialize Supabase client
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
 
     // 4. Implement Idempotency
     const { data: existingPayment, error: fetchError } = await supabase

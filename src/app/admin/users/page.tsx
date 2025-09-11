@@ -30,7 +30,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Profile } from '@/types'
 
 interface UserStats {
@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>('all')
   // const [statusFilter, setStatusFilter] = useState<string>('all') // Removed - is_active field doesn't exist in profiles table
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

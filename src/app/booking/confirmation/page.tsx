@@ -1,9 +1,11 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { BookingWithDetails } from '@/types'
 import { Loader2 } from 'lucide-react'
 
@@ -23,7 +25,7 @@ export default function BookingConfirmationPage() {
       }
 
       try {
-        const supabase = createClient()
+        const supabase = createSupabaseBrowser()
         
         const { data, error } = await supabase
           .from('bookings')

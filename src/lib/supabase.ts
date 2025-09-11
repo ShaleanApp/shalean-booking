@@ -1,18 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
-import { createClient as createBrowserClient } from './supabase/client'
-import { createClient as createServerClient, createAdminClient as createServerAdminClient } from './supabase/server'
+// Legacy exports for backward compatibility
+// Note: These should be replaced with direct imports from browser.ts or server.ts
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { createSupabaseBrowser } from './supabase/browser'
+import { createSupabaseServer, createAdminClient } from './supabase/server'
 
-// Legacy client-side Supabase client (for backward compatibility)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Client-side client (for components marked with 'use client')
+export const createClientComponentClient = createSupabaseBrowser
 
-// New client-side client (recommended for new code)
-export const createClientComponentClient = createBrowserClient
-
-// New server-side client (recommended for new code)
-export const createServerComponentClient = createServerClient
+// Server-side client (for server components and route handlers)
+export const createServerComponentClient = createSupabaseServer
 
 // Admin client (for server-side operations with service role)
-export const createAdminClient = createServerAdminClient
+export { createAdminClient }

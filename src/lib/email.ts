@@ -434,8 +434,8 @@ export async function trackEmailDelivery(
   errorMessage?: string
 ) {
   try {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
+    const { createSupabaseServer } = await import('@/lib/supabase/server');
+    const supabase = await createSupabaseServer();
     
     const notificationData = {
       user_id: userId,

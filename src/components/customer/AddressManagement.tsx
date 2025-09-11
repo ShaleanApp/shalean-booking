@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,7 +46,7 @@ export function AddressManagement() {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { user } = useProfile()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   const {
     register,

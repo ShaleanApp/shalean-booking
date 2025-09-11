@@ -25,7 +25,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Payment, Booking } from '@/types'
 
 interface PaymentWithBooking extends Payment {
@@ -53,7 +53,7 @@ export default function AdminPaymentsPage() {
   })
   const [webhookStatus, setWebhookStatus] = useState<'online' | 'offline' | 'unknown'>('unknown')
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

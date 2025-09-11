@@ -18,7 +18,7 @@ import {
   XCircle,
   RefreshCw
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 
 interface AnalyticsData {
   revenue: {
@@ -66,7 +66,7 @@ export default function AdminAnalyticsPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(true)
   const [timeRange, setTimeRange] = useState('30d')
 
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (profile?.role === 'admin') {

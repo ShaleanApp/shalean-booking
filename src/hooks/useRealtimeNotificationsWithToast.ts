@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { RealtimeChannel } from '@supabase/supabase-js'
 import { useToast } from '@/hooks/use-toast'
 import { useProfile } from '@/hooks/useProfile'
@@ -108,7 +108,7 @@ export function useRealtimeNotificationsWithToast(): UseRealtimeNotificationsWit
   
   const { toast } = useToast()
   const { user } = useProfile()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   const subscribe = useCallback(() => {
     if (!user) {

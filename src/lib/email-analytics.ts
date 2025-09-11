@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export interface EmailStats {
   totalSent: number;
@@ -30,7 +30,7 @@ export async function getEmailAnalytics(
   userId?: string
 ): Promise<EmailStats | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     // Set default date range to last 30 days if not provided
     const defaultStartDate = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -127,7 +127,7 @@ export async function getEmailDeliveryStatus(messageId: string): Promise<{
   errorMessage?: string;
 } | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     const { data: notification, error } = await supabase
       .from('notifications')
@@ -157,7 +157,7 @@ export async function retryFailedEmails(): Promise<{
   errors: string[];
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     // Get failed emails from the last 24 hours
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);

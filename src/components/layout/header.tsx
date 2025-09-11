@@ -31,8 +31,8 @@ export function Header() {
   const { user, profile, loading } = useProfile()
 
   const handleLogout = async () => {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
+    const { createSupabaseBrowser } = await import('@/lib/supabase/browser')
+    const supabase = createSupabaseBrowser()
     await supabase.auth.signOut()
     window.location.href = '/'
   }

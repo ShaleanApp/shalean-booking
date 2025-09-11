@@ -1,11 +1,13 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getEmailAnalytics } from '@/lib/email-analytics';
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
     // Check if user is admin
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {

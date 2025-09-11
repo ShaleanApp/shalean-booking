@@ -1,6 +1,8 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 
 const updateItemSchema = z.object({
   category_id: z.string().optional(),
@@ -21,7 +23,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -66,7 +68,7 @@ export async function PUT(
 ) {
   try {
     const params = await context.params
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -156,7 +158,7 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

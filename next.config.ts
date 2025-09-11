@@ -76,6 +76,17 @@ const nextConfig: NextConfig = {
         'web-push': 'commonjs web-push',
         '@paystack/inline-js': 'commonjs @paystack/inline-js',
       });
+      
+      // Add webpack plugin to define global variables for server builds
+      const webpack = require('webpack');
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          'typeof self': JSON.stringify('undefined'),
+          'typeof window': JSON.stringify('undefined'),
+          'typeof global': JSON.stringify('undefined'),
+        })
+      );
     }
 
     return config;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { User } from '@supabase/supabase-js'
 
 interface Profile {
@@ -31,7 +31,7 @@ export function useProfile(): UseProfileReturn {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   const fetchProfile = async () => {
     try {

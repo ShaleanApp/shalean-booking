@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { useProfile } from './useProfile'
 
 export interface CleanerJob {
@@ -44,7 +44,7 @@ export function useCleanerJobs() {
   const [jobs, setJobs] = useState<CleanerJob[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useProfile()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (!user) {

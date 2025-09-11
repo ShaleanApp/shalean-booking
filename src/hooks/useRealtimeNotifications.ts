@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
 interface Notification {
@@ -35,7 +35,7 @@ export function useRealtimeNotifications(): UseRealtimeNotificationsReturn {
   const [isConnected, setIsConnected] = useState(false)
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   const subscribe = useCallback(() => {
     try {

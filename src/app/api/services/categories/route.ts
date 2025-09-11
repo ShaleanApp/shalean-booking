@@ -1,5 +1,7 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 // Validation schemas
@@ -16,7 +18,7 @@ const updateCategorySchema = createCategorySchema.partial()
 // GET /api/services/categories
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()
@@ -65,7 +67,7 @@ export async function GET(request: NextRequest) {
 // POST /api/services/categories
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     // Check if user is authenticated and has admin role
     const { data: { user } } = await supabase.auth.getUser()

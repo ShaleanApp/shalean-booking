@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,7 +57,7 @@ export function BookingModificationModal({
   const [selectedServices, setSelectedServices] = useState<{[key: string]: number}>({})
   const [selectedExtras, setSelectedExtras] = useState<{[key: string]: number}>({})
   const [totalAmount, setTotalAmount] = useState(0)
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   const {
     register,

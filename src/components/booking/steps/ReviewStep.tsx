@@ -1,3 +1,5 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -7,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useBooking } from '@/contexts/BookingContext'
 import { ServiceItem, ServiceExtra, Address } from '@/types'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Calendar, Clock, MapPin, DollarSign, FileText } from 'lucide-react'
 import { formatServicePrice, formatExtraPrice, formatTotalAmount } from '@/lib/currency'
 
@@ -22,7 +24,7 @@ export function ReviewStep() {
   useEffect(() => {
     const fetchServiceDetails = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createSupabaseBrowser()
         
         // Fetch service items
         if (state.formData.services.length > 0) {

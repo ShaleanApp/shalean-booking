@@ -1,10 +1,12 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 
 // GET /api/public/services/categories - Public endpoint for customers
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     
     // Get query parameters
     const { searchParams } = new URL(request.url)

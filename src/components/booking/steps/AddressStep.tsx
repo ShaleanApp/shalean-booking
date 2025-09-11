@@ -1,3 +1,5 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -8,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBooking } from '@/contexts/BookingContext'
 import { Address } from '@/types'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { MapPin, Plus, Home, Building, Map, Check } from 'lucide-react'
 
 export function AddressStep() {
@@ -34,7 +36,7 @@ export function AddressStep() {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createSupabaseBrowser()
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {

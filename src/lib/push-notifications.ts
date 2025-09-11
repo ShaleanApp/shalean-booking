@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 
 interface PushSubscription {
   endpoint: string
@@ -32,7 +32,7 @@ class PushNotificationService {
     }
     
     this.vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
-    this.supabase = createClient()
+    this.supabase = createSupabaseBrowser()
   }
 
   // Check if push notifications are supported

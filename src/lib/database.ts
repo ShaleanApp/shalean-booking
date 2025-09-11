@@ -1,10 +1,11 @@
-import { supabase } from './supabase'
+import { createSupabaseServer } from './supabase/server'
 import type { Database, Profile, ServiceCategory, ServiceItem, ServiceExtra, Booking, Address, Payment } from '@/types'
 
 // Database utility functions
 export class DatabaseService {
   // Profile operations
   static async getProfile(userId: string): Promise<Profile | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -20,6 +21,7 @@ export class DatabaseService {
   }
 
   static async updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -37,6 +39,7 @@ export class DatabaseService {
 
   // Service operations
   static async getServiceCategories(): Promise<ServiceCategory[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('service_categories')
       .select('*')
@@ -52,6 +55,7 @@ export class DatabaseService {
   }
 
   static async getServiceItems(categoryId?: string): Promise<ServiceItem[]> {
+    const supabase = await createSupabaseServer()
     let query = supabase
       .from('service_items')
       .select('*')
@@ -73,6 +77,7 @@ export class DatabaseService {
   }
 
   static async getServiceExtras(): Promise<ServiceExtra[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('service_extras')
       .select('*')
@@ -89,6 +94,7 @@ export class DatabaseService {
 
   // Address operations
   static async getUserAddresses(userId: string): Promise<Address[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('addresses')
       .select('*')
@@ -105,6 +111,7 @@ export class DatabaseService {
   }
 
   static async createAddress(userId: string, address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Address | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('addresses')
       .insert({ ...address, user_id: userId })
@@ -120,6 +127,7 @@ export class DatabaseService {
   }
 
   static async updateAddress(addressId: string, updates: Partial<Address>): Promise<Address | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('addresses')
       .update(updates)
@@ -136,6 +144,7 @@ export class DatabaseService {
   }
 
   static async deleteAddress(addressId: string): Promise<boolean> {
+    const supabase = await createSupabaseServer()
     const { error } = await supabase
       .from('addresses')
       .delete()
@@ -151,6 +160,7 @@ export class DatabaseService {
 
   // Booking operations
   static async createBooking(booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('bookings')
       .insert(booking)
@@ -166,6 +176,7 @@ export class DatabaseService {
   }
 
   static async getUserBookings(userId: string): Promise<Booking[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
@@ -181,6 +192,7 @@ export class DatabaseService {
   }
 
   static async getCleanerBookings(cleanerId: string): Promise<Booking[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
@@ -196,6 +208,7 @@ export class DatabaseService {
   }
 
   static async updateBookingStatus(bookingId: string, status: Booking['status']): Promise<boolean> {
+    const supabase = await createSupabaseServer()
     const { error } = await supabase
       .from('bookings')
       .update({ status })
@@ -211,6 +224,7 @@ export class DatabaseService {
 
   // Payment operations
   static async createPayment(payment: Omit<Payment, 'id' | 'created_at' | 'updated_at'>): Promise<Payment | null> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('payments')
       .insert(payment)
@@ -226,6 +240,7 @@ export class DatabaseService {
   }
 
   static async updatePaymentStatus(paymentId: string, status: Payment['status'], transactionId?: string): Promise<boolean> {
+    const supabase = await createSupabaseServer()
     const updates: Partial<Payment> = { status }
     if (transactionId) {
       updates.transaction_id = transactionId
@@ -246,6 +261,7 @@ export class DatabaseService {
 
   // Admin operations
   static async getAllBookings(): Promise<Booking[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
@@ -260,6 +276,7 @@ export class DatabaseService {
   }
 
   static async getAllUsers(): Promise<Profile[]> {
+    const supabase = await createSupabaseServer()
     const { data, error } = await supabase
       .from('profiles')
       .select('*')

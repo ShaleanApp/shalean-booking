@@ -1,3 +1,5 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -7,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useBooking } from '@/contexts/BookingContext'
 import { ServiceItem, ServiceExtra, Address } from '@/types'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { 
   CheckCircle, 
   Calendar, 
@@ -37,7 +39,7 @@ export function BookingConfirmation({ bookingId, className }: BookingConfirmatio
   useEffect(() => {
     const fetchServiceDetails = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createSupabaseBrowser()
         
         // Fetch service items
         if (state.formData.services.length > 0) {

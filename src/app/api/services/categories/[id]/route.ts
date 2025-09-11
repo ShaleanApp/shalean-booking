@@ -1,5 +1,7 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 // Validation schemas
@@ -17,7 +19,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role
@@ -63,7 +65,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role
@@ -116,7 +118,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServer()
     const { id: categoryId } = await params
     
     // Check if user is authenticated and has admin role

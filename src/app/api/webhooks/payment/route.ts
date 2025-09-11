@@ -1,5 +1,7 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 
 // Webhook secret for verification (should be set in environment variables)
@@ -55,7 +57,7 @@ function verifyWebhookSignature(body: string, signature: string | null): boolean
 }
 
 async function handlePaymentCompleted(data: any) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServer()
   
   try {
     const { payment_id, amount, currency, reference } = data
@@ -92,7 +94,7 @@ async function handlePaymentCompleted(data: any) {
 }
 
 async function handlePaymentFailed(data: any) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServer()
   
   try {
     const { payment_id, reason } = data
@@ -128,7 +130,7 @@ async function handlePaymentFailed(data: any) {
 }
 
 async function handlePaymentRefunded(data: any) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServer()
   
   try {
     const { payment_id, refund_amount, refund_reason } = data
@@ -166,7 +168,7 @@ async function handlePaymentRefunded(data: any) {
 }
 
 async function handlePaymentChargeback(data: any) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServer()
   
   try {
     const { payment_id, chargeback_reason } = data

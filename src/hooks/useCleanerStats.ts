@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { useProfile } from './useProfile'
 
 interface CleanerStats {
@@ -19,7 +19,7 @@ export function useCleanerStats() {
   const [stats, setStats] = useState<CleanerStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useProfile()
-  const supabase = createClient()
+  const supabase = createSupabaseBrowser()
 
   useEffect(() => {
     if (!user) {

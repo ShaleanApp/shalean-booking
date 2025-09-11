@@ -1,3 +1,5 @@
+'use client'
+
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -6,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useBooking } from '@/contexts/BookingContext'
 import { ServiceCategory, ServiceItem, ServiceExtra } from '@/types'
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Plus, Minus, Check } from 'lucide-react'
 import { formatServicePrice, formatExtraPrice, formatTotalAmount } from '@/lib/currency'
 import { LoadingState, RetryButton } from '@/components/shared/LoadingState'
@@ -42,7 +44,7 @@ export function ServiceSelectionStep() {
         throw new Error('Supabase environment variables are not configured. Please check your .env.local file.')
       }
 
-      const supabase = createClient()
+      const supabase = createSupabaseBrowser()
       
       // Fetch categories with caching
       const categoriesData = await cachedApiCall(

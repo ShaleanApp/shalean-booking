@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/client'
+import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import type { Database, Profile, ServiceCategory, ServiceItem, ServiceExtra, Booking, Address, Payment } from '@/types'
 
 // Client-side database utility functions
 export class DatabaseClientService {
   private static getClient() {
-    return createClient()
+    return createSupabaseBrowser()
   }
 
   // Profile operations

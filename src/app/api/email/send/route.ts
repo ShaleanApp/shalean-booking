@@ -1,6 +1,8 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { sendBookingConfirmation, sendBookingReminder, sendBookingStatusUpdate } from '@/lib/email';
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get booking details from database
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
