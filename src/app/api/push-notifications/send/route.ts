@@ -1,13 +1,23 @@
 import { createAdminClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
-import webpush from 'web-push'
 
-// Configure web-push
-webpush.setVapidDetails(
-  'mailto:admin@shaleancleaning.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+// Dynamic import for web-push to avoid server-side bundling issues
+let webpush: any = null;
+
+async function getWebPush() {
+  if (!webpush) {
+    const webPushModule = await import('web-push');
+    webpush = webPushModule.default;
+    
+    // Configure web-push
+    webpush.setVapidDetails(
+      'mailto:admin@shaleancleaning.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+  }
+  return webpush;
+}
 
 interface PushNotificationPayload {
   title: string
@@ -78,6 +88,9 @@ export async function POST(request: NextRequest) {
       ]
     }
 
+    // Get web-push instance
+    const webpushInstance = await getWebPush();
+
     // Send push notifications to all user's devices
     const results = await Promise.allSettled(
       subscriptions.map(async (subscription) => {
@@ -90,7 +103,7 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          await webpush.sendNotification(
+          await webpushInstance.sendNotification(
             pushSubscription,
             JSON.stringify(payload)
           )

@@ -50,14 +50,31 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Server-side fallbacks
-    if (isServer && dev) {
+    // Server-side fallbacks and client-side code handling
+    if (isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
         os: false,
+        // Prevent client-side globals from being used on server
+        'serviceworker': false,
       };
+    }
+
+    // Handle client-side specific modules
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // Prevent server-side execution of client-only modules
+      '@/lib/push-notifications': isServer ? false : '@/lib/push-notifications',
+    };
+
+    // Configure web-push for server-side usage
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'web-push': 'commonjs web-push',
+      });
     }
 
     return config;

@@ -26,6 +26,11 @@ class PushNotificationService {
   private supabase: any
 
   constructor() {
+    // Only initialize on client side
+    if (typeof window === 'undefined') {
+      throw new Error('PushNotificationService can only be used on the client side')
+    }
+    
     this.vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
     this.supabase = createClient()
   }
@@ -170,8 +175,10 @@ class PushNotificationService {
   }
 }
 
-// Create singleton instance
-export const pushNotificationService = new PushNotificationService()
+// Create singleton instance only on client side
+export const pushNotificationService = typeof window !== 'undefined' 
+  ? new PushNotificationService() 
+  : null
 
 // Hook for using push notifications
 export function usePushNotifications() {
@@ -180,6 +187,11 @@ export function usePushNotifications() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined' || !pushNotificationService) {
+      return
+    }
+
     setIsSupported(pushNotificationService.isSupported())
     
     // Check if already registered
@@ -193,6 +205,8 @@ export function usePushNotifications() {
   }, [])
 
   const register = async () => {
+    if (!pushNotificationService) return
+    
     setIsLoading(true)
     try {
       const subscription = await pushNotificationService.register()
@@ -205,6 +219,8 @@ export function usePushNotifications() {
   }
 
   const unregister = async () => {
+    if (!pushNotificationService) return
+    
     setIsLoading(true)
     try {
       await pushNotificationService.unregister()
@@ -217,6 +233,7 @@ export function usePushNotifications() {
   }
 
   const sendTest = async () => {
+    if (!pushNotificationService) return
     await pushNotificationService.sendTestNotification()
   }
 
