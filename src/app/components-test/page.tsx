@@ -7,7 +7,7 @@ import { ShaleanModal, ConfirmationModal, BookingModal, ServiceSelectionModal } 
 import { Button } from "@/components/ui/button";
 
 export default function ComponentsTestPage() {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string | undefined>(undefined);
   const [isContactFormLoading, setIsContactFormLoading] = useState(false);
   const [isBookingFormLoading, setIsBookingFormLoading] = useState(false);
   

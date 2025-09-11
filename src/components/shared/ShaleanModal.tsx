@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface ShaleanModalProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title?: string;
   description?: string;
   content?: React.ReactNode;
@@ -164,7 +164,9 @@ export function ConfirmationModal({
           </Button>
         </div>
       }
-    />
+    >
+      {/* Confirmation modal content is handled by title and description */}
+    </ShaleanModal>
   );
 }
 

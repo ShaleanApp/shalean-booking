@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/popover'
 import { Bell, Check, CheckCheck, Loader2 } from 'lucide-react'
 import { useRealtimeNotificationsWithToast } from '@/hooks/useRealtimeNotificationsWithToast'
+import { useProfile } from '@/hooks/useProfile'
 
 interface Notification {
   id: string
@@ -35,7 +36,7 @@ export function NotificationDropdown() {
   const [markingAsRead, setMarkingAsRead] = useState<string | null>(null)
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false)
   
-  const { user } = useRealtimeNotificationsWithToast()
+  const { user } = useProfile()
   const supabase = createClient()
 
   // Fetch notifications from database

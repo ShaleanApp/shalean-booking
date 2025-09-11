@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CreditCard, Loader2, CheckCircle, XCircle } from 'lucide-react'
-import dynamic from 'next/dynamic'
-
-// Dynamically import PaystackPop to avoid SSR issues
-const PaystackPop = dynamic(() => import('@paystack/inline-js'), { ssr: false })
+// Import PaystackPop directly - it's safe to use in client components
+import PaystackPop from '@paystack/inline-js'
 
 interface PaystackPaymentProps {
   amount: number // Amount in kobo (e.g., 500000 for NGN 5000.00)

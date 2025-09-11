@@ -27,8 +27,7 @@ import { useRouter } from 'next/navigation'
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
-  phone: z.string().min(1, 'Phone number is required'),
-  bio: z.string().optional()
+  phone: z.string().min(1, 'Phone number is required')
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -36,7 +35,7 @@ type ProfileFormData = z.infer<typeof profileSchema>
 export function ProfileManagement() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { user, profile, loading, refetch } = useProfile()
+  const { user, profile, loading, refreshProfile } = useProfile()
   const supabase = createClient()
   const router = useRouter()
 
@@ -49,8 +48,7 @@ export function ProfileManagement() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       full_name: profile?.full_name || '',
-      phone: profile?.phone || '',
-      bio: profile?.bio || ''
+      phone: profile?.phone || ''
     }
   })
 
@@ -64,7 +62,6 @@ export function ProfileManagement() {
         .update({
           full_name: data.full_name,
           phone: data.phone,
-          bio: data.bio,
           updated_at: new Date().toISOString()
         })
         .eq('id', profile.id)
@@ -74,7 +71,7 @@ export function ProfileManagement() {
         return
       }
 
-      await refetch()
+      await refreshProfile()
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating profile:', error)
@@ -87,8 +84,7 @@ export function ProfileManagement() {
     setIsEditing(true)
     reset({
       full_name: profile?.full_name || '',
-      phone: profile?.phone || '',
-      bio: profile?.bio || ''
+      phone: profile?.phone || ''
     })
   }
 
@@ -96,8 +92,7 @@ export function ProfileManagement() {
     setIsEditing(false)
     reset({
       full_name: profile?.full_name || '',
-      phone: profile?.phone || '',
-      bio: profile?.bio || ''
+      phone: profile?.phone || ''
     })
   }
 
@@ -229,16 +224,6 @@ export function ProfileManagement() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio (Optional)</Label>
-                <Textarea
-                  id="bio"
-                  {...register('bio')}
-                  placeholder="Tell us about yourself..."
-                  rows={3}
-                />
-                {errors.bio && <p className="text-sm text-red-600">{errors.bio.message}</p>}
-              </div>
             </form>
           ) : (
             <div className="space-y-4">
@@ -282,12 +267,6 @@ export function ProfileManagement() {
                 </div>
               </div>
 
-              {profile.bio && (
-                <div className="space-y-2">
-                  <Label>Bio</Label>
-                  <p className="text-sm text-gray-600">{profile.bio}</p>
-                </div>
-              )}
 
               <div className="space-y-2">
                 <Label>Account Created</Label>

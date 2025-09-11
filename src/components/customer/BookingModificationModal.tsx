@@ -71,7 +71,7 @@ export function BookingModificationModal({
       service_date: booking.service_date,
       service_time: booking.service_time,
       notes: booking.notes || '',
-      address_id: booking.address_id
+      address_id: booking.address?.id
     }
   })
 

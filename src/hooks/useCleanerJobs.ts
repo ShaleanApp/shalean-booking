@@ -116,21 +116,21 @@ export function useCleanerJobs() {
         service_time: booking.service_time,
         status: booking.status,
         total_price: booking.total_price,
-        customer_name: booking.profiles?.full_name || 'Unknown',
-        customer_phone: booking.profiles?.phone || '',
+        customer_name: (booking.profiles as any)?.full_name || 'Unknown',
+        customer_phone: (booking.profiles as any)?.phone || '',
         address: {
-          street_address: booking.addresses?.street_address || '',
-          city: booking.addresses?.city || '',
-          state: booking.addresses?.state || '',
-          postal_code: booking.addresses?.postal_code || '',
-          address_type: booking.addresses?.address_type || 'home'
+          street_address: (booking.addresses as any)?.street_address || '',
+          city: (booking.addresses as any)?.city || '',
+          state: (booking.addresses as any)?.state || '',
+          postal_code: (booking.addresses as any)?.postal_code || '',
+          address_type: (booking.addresses as any)?.address_type || 'home'
         },
         services: booking.booking_services?.map(bs => ({
           service_item: {
-            name: bs.service_items?.name || '',
-            description: bs.service_items?.description || '',
-            price: bs.service_items?.price || 0,
-            duration_minutes: bs.service_items?.duration_minutes || 0
+            name: (bs.service_items as any)?.name || '',
+            description: (bs.service_items as any)?.description || '',
+            price: (bs.service_items as any)?.price || 0,
+            duration_minutes: (bs.service_items as any)?.duration_minutes || 0
           },
           quantity: bs.quantity
         })) || [],

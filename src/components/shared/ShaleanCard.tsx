@@ -19,6 +19,7 @@ interface ShaleanCardProps {
   className?: string;
   variant?: "default" | "primary" | "secondary" | "accent" | "outline";
   size?: "sm" | "md" | "lg";
+  onClick?: () => void;
 }
 
 const cardVariants = {
@@ -44,6 +45,7 @@ export function ShaleanCard({
   className,
   variant = "default",
   size = "md",
+  onClick,
   ...props
 }: ShaleanCardProps) {
   return (
@@ -51,8 +53,10 @@ export function ShaleanCard({
       className={cn(
         cardVariants[variant],
         cardSizes[size],
+        onClick && "cursor-pointer",
         className
       )}
+      onClick={onClick}
       {...props}
     >
       {(title || description || action) && (
