@@ -1,30 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
 
-// Validation schemas
 const createItemSchema = z.object({
-  category_id: z.string().uuid('Invalid category ID'),
+  category_id: z.string().min(1, 'Category is required'),
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  base_price: z.number().min(0, 'Base price must be non-negative'),
+  base_price: z.number().min(0, 'Price must be non-negative'),
   unit: z.string().min(1, 'Unit is required'),
-  is_quantity_based: z.boolean().default(false),
-  min_quantity: z.number().min(1, 'Minimum quantity must be at least 1').default(1),
-  max_quantity: z.number().min(1, 'Maximum quantity must be at least 1').default(10),
-  is_active: z.boolean().default(true)
+  is_quantity_based: z.boolean(),
+  min_quantity: z.number().min(1, 'Minimum quantity must be at least 1'),
+  max_quantity: z.number().min(1, 'Maximum quantity must be at least 1'),
+  is_active: z.boolean().optional()
 })
 
-const updateItemSchema = createItemSchema.partial()
+const updateItemSchema = z.object({
+  category_id: z.string().optional(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  base_price: z.number().min(0).optional(),
+  unit: z.string().min(1).optional(),
+  is_quantity_based: z.boolean().optional(),
+  min_quantity: z.number().min(1).optional(),
+  max_quantity: z.number().min(1).optional(),
+  is_active: z.boolean().optional()
+})
 
 // GET /api/services/items
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
     
-    // Check if user is authenticated and has admin role
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -38,25 +46,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get query parameters
     const { searchParams } = new URL(request.url)
-    const activeOnly = searchParams.get('active_only') === 'true'
     const categoryId = searchParams.get('category_id')
+    const isActive = searchParams.get('is_active')
 
     let query = supabase
       .from('service_items')
       .select(`
         *,
-        category:service_categories(id, name, description)
+        category:service_categories(name)
       `)
       .order('created_at', { ascending: false })
 
-    if (activeOnly) {
-      query = query.eq('is_active', true)
-    }
-
     if (categoryId) {
       query = query.eq('category_id', categoryId)
+    }
+
+    if (isActive !== null) {
+      query = query.eq('is_active', isActive === 'true')
     }
 
     const { data: items, error } = await query
@@ -78,9 +85,8 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     
-    // Check if user is authenticated and has admin role
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -98,22 +104,34 @@ export async function POST(request: NextRequest) {
     const validatedData = createItemSchema.parse(body)
 
     // Verify category exists
-    const { data: category } = await supabase
+    const { data: category, error: categoryError } = await supabase
       .from('service_categories')
       .select('id')
       .eq('id', validatedData.category_id)
       .single()
 
-    if (!category) {
+    if (categoryError || !category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 400 })
+    }
+
+    // Validate quantity constraints
+    if (validatedData.is_quantity_based) {
+      if (validatedData.min_quantity > validatedData.max_quantity) {
+        return NextResponse.json({ 
+          error: 'Minimum quantity cannot be greater than maximum quantity' 
+        }, { status: 400 })
+      }
     }
 
     const { data: item, error } = await supabase
       .from('service_items')
-      .insert(validatedData)
+      .insert({
+        ...validatedData,
+        is_active: validatedData.is_active ?? true
+      })
       .select(`
         *,
-        category:service_categories(id, name, description)
+        category:service_categories(name)
       `)
       .single()
 
@@ -125,7 +143,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ item }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Validation error', details: error.issues }, { status: 400 })
     }
     console.error('Error in POST /api/services/items:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -64,7 +64,7 @@ export default function ServiceItemsPage() {
     )
   }
 
-  const handleCreateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined }) => {
+  const handleCreateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
     try {
       await createItem.mutateAsync({
         ...data,
@@ -76,7 +76,7 @@ export default function ServiceItemsPage() {
     }
   }
 
-  const handleUpdateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined }) => {
+  const handleUpdateItem = async (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
     if (!editingItem) return
     
     try {
@@ -148,7 +148,7 @@ export default function ServiceItemsPage() {
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Search */}
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search items..."
                   value={searchTerm}
@@ -159,11 +159,11 @@ export default function ServiceItemsPage() {
 
               {/* Category Filter */}
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-500" />
+                <Filter className="h-4 w-4 text-gray-400" />
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="all">All Categories</option>
                   {categories?.map(category => (
@@ -175,61 +175,39 @@ export default function ServiceItemsPage() {
               </div>
             </div>
 
-            <Button onClick={() => setIsFormOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Item
+            {/* Add Item Button */}
+            <Button onClick={() => setIsFormOpen(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Item
             </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-4">
-            <Badge variant="outline" className="text-sm">
-              {filteredItems.length} items
-            </Badge>
-            {items && (
-              <Badge variant="outline" className="text-sm">
-                {items.filter(i => i.is_active).length} active
-              </Badge>
-            )}
-            {selectedCategory !== 'all' && (
-              <Badge variant="outline" className="text-sm">
-                {categories?.find(c => c.id === selectedCategory)?.name} category
-              </Badge>
-            )}
           </div>
         </div>
 
         {/* Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Service Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                Loading items...
-              </div>
-            ) : error ? (
-              <div className="text-center py-8">
-                <p className="text-red-600 mb-4">Error loading items</p>
-                <Button onClick={() => window.location.reload()}>
-                  Try Again
-                </Button>
-              </div>
-            ) : (
-              <ItemTable
-                items={filteredItems}
-                onEdit={setEditingItem}
-                onDelete={setDeletingItem}
-                onToggleStatus={handleToggleStatus}
-                isUpdating={updateItem.isPending}
-                isDeleting={deleteItem.isPending}
-                isToggling={toggleItemStatus.isPending}
-              />
-            )}
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          </div>
+        ) : error ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-red-600 mb-4">Error loading items: {typeof error === 'string' ? error : 'Unknown error'}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <ItemTable
+            items={filteredItems}
+            onEdit={setEditingItem}
+            onDelete={setDeletingItem}
+            onToggleStatus={handleToggleStatus}
+            isUpdating={updateItem.isPending}
+            isDeleting={deleteItem.isPending}
+            isToggling={toggleItemStatus.isPending}
+          />
+        )}
 
         {/* Forms and Dialogs */}
         <ItemForm

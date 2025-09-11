@@ -4,12 +4,17 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ServiceItem, ServiceCategory } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -17,22 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { ServiceItem, ServiceCategory } from '@/types'
 import { Loader2 } from 'lucide-react'
 
 const itemSchema = z.object({
   category_id: z.string().min(1, 'Category is required'),
-  name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
-  description: z.string().max(500, 'Description must be less than 500 characters').optional(),
-  base_price: z.number().min(0, 'Price must be non-negative').max(9999.99, 'Price must be less than $10,000'),
-  unit: z.string().min(1, 'Unit is required').max(20, 'Unit must be less than 20 characters'),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  base_price: z.number().min(0, 'Price must be non-negative'),
+  unit: z.string().min(1, 'Unit is required'),
   is_quantity_based: z.boolean(),
   min_quantity: z.number().min(1, 'Minimum quantity must be at least 1'),
   max_quantity: z.number().min(1, 'Maximum quantity must be at least 1'),
@@ -44,7 +42,7 @@ type ItemFormData = z.infer<typeof itemSchema>
 interface ItemFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined }) => void
+  onSubmit: (data: Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>) => void
   item?: ServiceItem | null
   categories: ServiceCategory[]
   isSubmitting: boolean
@@ -58,8 +56,6 @@ export function ItemForm({
   categories,
   isSubmitting
 }: ItemFormProps) {
-  const [isActive, setIsActive] = useState(true)
-  
   const {
     register,
     handleSubmit,
@@ -74,18 +70,19 @@ export function ItemForm({
       name: '',
       description: '',
       base_price: 0,
-      unit: 'hour',
+      unit: '',
       is_quantity_based: false,
       min_quantity: 1,
-      max_quantity: 10,
+      max_quantity: 1,
       is_active: true
     }
   })
 
-  const watchedIsActive = watch('is_active')
   const watchedCategoryId = watch('category_id')
+  const watchedIsQuantityBased = watch('is_quantity_based')
+  const isActive = watch('is_active')
 
-  // Reset form when item changes or dialog opens/closes
+  // Reset form when dialog opens/closes or item changes
   useEffect(() => {
     if (isOpen) {
       if (item) {
@@ -100,30 +97,29 @@ export function ItemForm({
           max_quantity: item.max_quantity,
           is_active: item.is_active
         })
-        setIsActive(item.is_active)
       } else {
         reset({
           category_id: '',
           name: '',
           description: '',
           base_price: 0,
-          unit: 'hour',
+          unit: '',
           is_quantity_based: false,
           min_quantity: 1,
-          max_quantity: 10,
+          max_quantity: 1,
           is_active: true
         })
-        setIsActive(true)
       }
     }
   }, [isOpen, item, reset])
 
   const handleFormSubmit = (data: ItemFormData) => {
     const { description, ...restData } = data
-    onSubmit({
+    const formData = {
       ...restData,
-      description: description || undefined
-    } as Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'> & { description?: string | undefined })
+      description: description || null
+    }
+    onSubmit(formData as Omit<ServiceItem, 'id' | 'created_at' | 'updated_at' | 'category'>)
   }
 
   const handleClose = () => {
@@ -135,17 +131,11 @@ export function ItemForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {item ? 'Edit Service Item' : 'Create New Service Item'}
+            {item ? 'Edit Service Item' : 'Add New Service Item'}
           </DialogTitle>
-          <DialogDescription>
-            {item 
-              ? 'Update the service item information below.'
-              : 'Fill in the details to create a new service item.'
-            }
-          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -178,8 +168,8 @@ export function ItemForm({
               <Input
                 id="name"
                 {...register('name')}
-                placeholder="e.g., Deep Cleaning"
                 disabled={isSubmitting}
+                placeholder="Enter item name"
               />
               {errors.name && (
                 <p className="text-sm text-red-600">{errors.name.message}</p>
@@ -192,9 +182,9 @@ export function ItemForm({
             <Textarea
               id="description"
               {...register('description')}
-              placeholder="Brief description of this service item..."
-              rows={3}
               disabled={isSubmitting}
+              placeholder="Enter item description (optional)"
+              rows={3}
             />
             {errors.description && (
               <p className="text-sm text-red-600">{errors.description.message}</p>
@@ -203,16 +193,15 @@ export function ItemForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="base_price">Base Price ($) *</Label>
+              <Label htmlFor="base_price">Base Price *</Label>
               <Input
                 id="base_price"
                 type="number"
                 step="0.01"
                 min="0"
-                max="9999.99"
                 {...register('base_price', { valueAsNumber: true })}
-                placeholder="0.00"
                 disabled={isSubmitting}
+                placeholder="0.00"
               />
               {errors.base_price && (
                 <p className="text-sm text-red-600">{errors.base_price.message}</p>
@@ -224,8 +213,8 @@ export function ItemForm({
               <Input
                 id="unit"
                 {...register('unit')}
-                placeholder="e.g., hour, room, sq ft"
                 disabled={isSubmitting}
+                placeholder="e.g., per hour, per room"
               />
               {errors.unit && (
                 <p className="text-sm text-red-600">{errors.unit.message}</p>
@@ -234,34 +223,27 @@ export function ItemForm({
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_quantity_based"
-                  checked={watch('is_quantity_based')}
-                  onCheckedChange={(checked) => setValue('is_quantity_based', checked, { shouldDirty: true })}
-                  disabled={isSubmitting}
-                />
-                <Label htmlFor="is_quantity_based">
-                  Quantity-based pricing
-                </Label>
-              </div>
-              <p className="text-xs text-gray-500">
-                Enable if customers can select different quantities
-              </p>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_quantity_based"
+                checked={watchedIsQuantityBased}
+                onCheckedChange={(checked) => setValue('is_quantity_based', checked, { shouldDirty: true })}
+                disabled={isSubmitting}
+              />
+              <Label htmlFor="is_quantity_based">Quantity-based pricing</Label>
             </div>
 
-            {watch('is_quantity_based') && (
+            {watchedIsQuantityBased && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="min_quantity">Minimum Quantity</Label>
+                  <Label htmlFor="min_quantity">Minimum Quantity *</Label>
                   <Input
                     id="min_quantity"
                     type="number"
                     min="1"
                     {...register('min_quantity', { valueAsNumber: true })}
-                    placeholder="1"
                     disabled={isSubmitting}
+                    placeholder="1"
                   />
                   {errors.min_quantity && (
                     <p className="text-sm text-red-600">{errors.min_quantity.message}</p>
@@ -269,14 +251,14 @@ export function ItemForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="max_quantity">Maximum Quantity</Label>
+                  <Label htmlFor="max_quantity">Maximum Quantity *</Label>
                   <Input
                     id="max_quantity"
                     type="number"
                     min="1"
                     {...register('max_quantity', { valueAsNumber: true })}
-                    placeholder="10"
                     disabled={isSubmitting}
+                    placeholder="10"
                   />
                   {errors.max_quantity && (
                     <p className="text-sm text-red-600">{errors.max_quantity.message}</p>
@@ -284,29 +266,19 @@ export function ItemForm({
                 </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={watchedIsActive}
-                  onCheckedChange={(checked) => {
-                    setValue('is_active', checked, { shouldDirty: true })
-                    setIsActive(checked)
-                  }}
-                  disabled={isSubmitting}
-                />
-                <Label htmlFor="is_active">
-                  Active
-                </Label>
-              </div>
-              <p className="text-xs text-gray-500">
-                Inactive items won't be shown to customers
-              </p>
-            </div>
           </div>
 
-          <DialogFooter>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_active"
+              checked={isActive}
+              onCheckedChange={(checked) => setValue('is_active', checked, { shouldDirty: true })}
+              disabled={isSubmitting}
+            />
+            <Label htmlFor="is_active">Active</Label>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -318,13 +290,12 @@ export function ItemForm({
             <Button
               type="submit"
               disabled={isSubmitting || !isDirty}
+              className="flex items-center gap-2"
             >
-              {isSubmitting && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {item ? 'Update Item' : 'Create Item'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

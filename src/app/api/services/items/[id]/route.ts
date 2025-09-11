@@ -1,30 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
 
-// Validation schemas
 const updateItemSchema = z.object({
-  category_id: z.string().uuid('Invalid category ID').optional(),
-  name: z.string().min(1, 'Name is required').optional(),
+  category_id: z.string().optional(),
+  name: z.string().min(1).optional(),
   description: z.string().optional(),
-  base_price: z.number().min(0, 'Base price must be non-negative').optional(),
-  duration_minutes: z.number().min(1, 'Duration must be at least 1 minute').optional(),
-  is_active: z.boolean().optional(),
-  sort_order: z.number().optional()
+  base_price: z.number().min(0).optional(),
+  unit: z.string().min(1).optional(),
+  is_quantity_based: z.boolean().optional(),
+  min_quantity: z.number().min(1).optional(),
+  max_quantity: z.number().min(1).optional(),
+  is_active: z.boolean().optional()
 })
 
 // GET /api/services/items/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const supabase = await createClient()
-    const { id: itemId } = await params
     
-    // Check if user is authenticated and has admin role
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -42,17 +42,14 @@ export async function GET(
       .from('service_items')
       .select(`
         *,
-        category:service_categories(id, name, description)
+        category:service_categories(name)
       `)
-      .eq('id', itemId)
+      .eq('id', params.id)
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Item not found' }, { status: 404 })
-      }
       console.error('Error fetching service item:', error)
-      return NextResponse.json({ error: 'Failed to fetch item' }, { status: 500 })
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
     }
 
     return NextResponse.json({ item })
@@ -65,15 +62,14 @@ export async function GET(
 // PUT /api/services/items/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const supabase = await createClient()
-    const { id: itemId } = await params
     
-    // Check if user is authenticated and has admin role
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -90,33 +86,55 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateItemSchema.parse(body)
 
-    // If category_id is being updated, verify category exists
+    // Check if item exists
+    const { data: existingItem, error: fetchError } = await supabase
+      .from('service_items')
+      .select('id')
+      .eq('id', params.id)
+      .single()
+
+    if (fetchError || !existingItem) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+
+    // If category_id is being updated, verify it exists
     if (validatedData.category_id) {
-      const { data: category } = await supabase
+      const { data: category, error: categoryError } = await supabase
         .from('service_categories')
         .select('id')
         .eq('id', validatedData.category_id)
         .single()
 
-      if (!category) {
+      if (categoryError || !category) {
         return NextResponse.json({ error: 'Category not found' }, { status: 400 })
+      }
+    }
+
+    // Validate quantity constraints if being updated
+    if (validatedData.is_quantity_based !== undefined && validatedData.is_quantity_based) {
+      if (validatedData.min_quantity !== undefined && validatedData.max_quantity !== undefined) {
+        if (validatedData.min_quantity > validatedData.max_quantity) {
+          return NextResponse.json({ 
+            error: 'Minimum quantity cannot be greater than maximum quantity' 
+          }, { status: 400 })
+        }
       }
     }
 
     const { data: item, error } = await supabase
       .from('service_items')
-      .update(validatedData)
-      .eq('id', itemId)
+      .update({
+        ...validatedData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', params.id)
       .select(`
         *,
-        category:service_categories(id, name, description)
+        category:service_categories(name)
       `)
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Item not found' }, { status: 404 })
-      }
       console.error('Error updating service item:', error)
       return NextResponse.json({ error: 'Failed to update item' }, { status: 500 })
     }
@@ -124,7 +142,7 @@ export async function PUT(
     return NextResponse.json({ item })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Validation error', details: error.issues }, { status: 400 })
     }
     console.error('Error in PUT /api/services/items/[id]:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -134,15 +152,14 @@ export async function PUT(
 // DELETE /api/services/items/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const supabase = await createClient()
-    const { id: itemId } = await params
     
-    // Check if user is authenticated and has admin role
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -156,28 +173,41 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Check if item has associated bookings
-    const { data: bookingServices } = await supabase
-      .from('booking_services')
+    // Check if item exists
+    const { data: existingItem, error: fetchError } = await supabase
+      .from('service_items')
       .select('id')
-      .eq('service_item_id', itemId)
+      .eq('id', params.id)
+      .single()
+
+    if (fetchError || !existingItem) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+
+    // Check if item is referenced by any bookings
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('id')
+      .contains('service_items', [{ item_id: params.id }])
       .limit(1)
 
-    if (bookingServices && bookingServices.length > 0) {
+    if (bookingsError) {
+      console.error('Error checking item references:', bookingsError)
+      return NextResponse.json({ error: 'Failed to check item references' }, { status: 500 })
+    }
+
+    if (bookings && bookings.length > 0) {
       return NextResponse.json({ 
-        error: 'Cannot delete item with associated bookings' 
+        error: 'Cannot delete item that is referenced by existing bookings' 
       }, { status: 400 })
     }
 
     const { error } = await supabase
       .from('service_items')
       .delete()
-      .eq('id', itemId)
+      .eq('id', params.id)
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Item not found' }, { status: 404 })
-      }
       console.error('Error deleting service item:', error)
       return NextResponse.json({ error: 'Failed to delete item' }, { status: 500 })
     }
