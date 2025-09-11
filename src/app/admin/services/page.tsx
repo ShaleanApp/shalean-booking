@@ -19,6 +19,10 @@ import { useCategories } from './categories/_hooks/use-categories'
 import { useItems } from './items/_hooks/use-items'
 import { useExtras } from './extras/_hooks/use-extras'
 
+// Export runtime and dynamic for Next.js
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export default function ServiceManagementPage() {
   const { profile, loading } = useProfile()
   const { categories, isLoading: categoriesLoading } = useCategories()

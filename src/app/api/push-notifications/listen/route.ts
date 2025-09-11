@@ -1,5 +1,7 @@
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+
+export const runtime = 'nodejs'
 
 // Dynamic import for web-push to avoid server-side bundling issues
 let webpush: any = null;

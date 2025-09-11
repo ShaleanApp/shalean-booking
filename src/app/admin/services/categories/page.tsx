@@ -21,6 +21,10 @@ import { CategoryTable } from './_components/category-table'
 import { DeleteCategoryDialog } from './_components/delete-category-dialog'
 import { useCategories } from './_hooks/use-categories'
 
+// Export runtime and dynamic for Next.js
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export default function ServiceCategoriesPage() {
   const { profile, loading } = useProfile()
   const [isFormOpen, setIsFormOpen] = useState(false)

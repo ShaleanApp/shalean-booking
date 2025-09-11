@@ -19,6 +19,10 @@ import { ExtraTable } from './_components/extra-table'
 import { DeleteExtraDialog } from './_components/delete-extra-dialog'
 import { useExtras } from './_hooks/use-extras'
 
+// Export runtime and dynamic for Next.js
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export default function ServiceExtrasPage() {
   const { profile, loading } = useProfile()
   const [isFormOpen, setIsFormOpen] = useState(false)

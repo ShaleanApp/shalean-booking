@@ -21,6 +21,10 @@ import { DeleteItemDialog } from './_components/delete-item-dialog'
 import { useItems } from './_hooks/use-items'
 import { useCategories } from '../categories/_hooks/use-categories'
 
+// Export runtime and dynamic for Next.js
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export default function ServiceItemsPage() {
   const { profile, loading } = useProfile()
   const [isFormOpen, setIsFormOpen] = useState(false)
