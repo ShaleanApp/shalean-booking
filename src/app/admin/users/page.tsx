@@ -25,9 +25,6 @@ import {
   Trash2
 } from 'lucide-react'
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
 import { 
   DropdownMenu, 
   DropdownMenuContent, 

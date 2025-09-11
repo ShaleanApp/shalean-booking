@@ -6,10 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Mail, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 interface EmailStats {
   totalSent: number;
   totalDelivered: number;

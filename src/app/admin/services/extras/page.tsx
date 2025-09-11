@@ -19,9 +19,6 @@ import { ExtraTable } from './_components/extra-table'
 import { DeleteExtraDialog } from './_components/delete-extra-dialog'
 import { useExtras } from './_hooks/use-extras'
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
 
 export default function ServiceExtrasPage() {
   const { profile, loading } = useProfile()
@@ -189,7 +186,7 @@ export default function ServiceExtrasPage() {
             ) : error ? (
               <div className="text-center py-8">
                 <p className="text-red-600 mb-4">Error loading extras</p>
-                <Button onClick={() => window.location.reload()}>
+                <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>
                   Try Again
                 </Button>
               </div>

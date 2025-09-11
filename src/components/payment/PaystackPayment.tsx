@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CreditCard, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY } from '@/lib/env.client'
 
 interface PaystackPaymentProps {
   amount: number // Amount in kobo (e.g., 500000 for NGN 5000.00)
@@ -39,7 +40,7 @@ export function PaystackPayment({
     reference: reference,
     email: email,
     amount: amount, // amount in kobo
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+    publicKey: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
     metadata: {
       ...metadata,
       custom_fields: [

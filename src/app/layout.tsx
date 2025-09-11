@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/toaster";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ToastContainer } from "@/components/shared/Toast";
+import { NEXT_PUBLIC_BASE_URL } from "@/lib/env.client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,14 +50,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://shaleancleaning.com'),
+  metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.NEXT_PUBLIC_BASE_URL || "https://shaleancleaning.com",
+    url: NEXT_PUBLIC_BASE_URL,
     siteName: "Shalean Cleaning Services",
     title: "Shalean Cleaning Services - Professional Home & Office Cleaning",
     description: "Professional cleaning services for your home and office. Book online with Shalean Cleaning Services for reliable, affordable, and eco-friendly cleaning solutions.",

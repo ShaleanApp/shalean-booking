@@ -21,9 +21,6 @@ import { DeleteItemDialog } from './_components/delete-item-dialog'
 import { useItems } from './_hooks/use-items'
 import { useCategories } from '../categories/_hooks/use-categories'
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
 
 export default function ServiceItemsPage() {
   const { profile, loading } = useProfile()
@@ -196,7 +193,7 @@ export default function ServiceItemsPage() {
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-red-600 mb-4">Error loading items: {typeof error === 'string' ? error : 'Unknown error'}</p>
-              <Button onClick={() => window.location.reload()}>
+              <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>
                 Try Again
               </Button>
             </CardContent>

@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Star, Users, Shield, Clock, Sparkles } from "lucide-react";
 import Script from "next/script";
 import { ServiceBrowser } from "@/components/services/ServiceBrowser";
+import { NEXT_PUBLIC_BASE_URL } from "@/lib/env.client";
 
 export default function Home() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '${baseUrl}'
+  const baseUrl = NEXT_PUBLIC_BASE_URL
   
   const structuredData = {
     "@context": "https://schema.org",

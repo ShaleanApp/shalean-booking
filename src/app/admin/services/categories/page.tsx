@@ -21,9 +21,6 @@ import { CategoryTable } from './_components/category-table'
 import { DeleteCategoryDialog } from './_components/delete-category-dialog'
 import { useCategories } from './_hooks/use-categories'
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
 
 export default function ServiceCategoriesPage() {
   const { profile, loading } = useProfile()
@@ -139,9 +136,9 @@ export default function ServiceCategoriesPage() {
         <div className="mb-6 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Badge variant="outline" className="text-sm">
-              {categories?.length || 0} categories
+              {Array.isArray(categories) ? categories.length : 0} categories
             </Badge>
-            {categories && (
+            {Array.isArray(categories) && (
               <Badge variant="outline" className="text-sm">
                 {categories.filter(c => c.is_active).length} active
               </Badge>
@@ -167,13 +164,13 @@ export default function ServiceCategoriesPage() {
             ) : error ? (
               <div className="text-center py-8">
                 <p className="text-red-600 mb-4">Error loading categories</p>
-                <Button onClick={() => window.location.reload()}>
+                <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>
                   Try Again
                 </Button>
               </div>
             ) : (
               <CategoryTable
-                categories={categories || []}
+                categories={Array.isArray(categories) ? categories : []}
                 onEdit={setEditingCategory}
                 onDelete={setDeletingCategory}
                 onToggleStatus={handleToggleStatus}

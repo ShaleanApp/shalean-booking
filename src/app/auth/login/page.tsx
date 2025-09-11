@@ -4,6 +4,7 @@ import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createSupabaseBrowser } from '@/lib/supabase/browser'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { NEXT_PUBLIC_BASE_URL } from '@/lib/env.client'
 import Link from 'next/link'
 
 export default function LoginPage() {
@@ -46,7 +47,7 @@ export default function LoginPage() {
                 }
               }}
               providers={['google', 'github']}
-              redirectTo={`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`}
+              redirectTo={`${NEXT_PUBLIC_BASE_URL}/auth/callback`}
               view="sign_in"
             />
           </CardContent>

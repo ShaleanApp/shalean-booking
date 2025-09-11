@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createSupabaseBrowser } from '@/lib/supabase/browser'
+import { NEXT_PUBLIC_VAPID_PUBLIC_KEY } from './env.client'
 
 interface PushSubscription {
   endpoint: string
@@ -31,7 +32,7 @@ class PushNotificationService {
       throw new Error('PushNotificationService can only be used on the client side')
     }
     
-    this.vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
+    this.vapidPublicKey = NEXT_PUBLIC_VAPID_PUBLIC_KEY
     this.supabase = createSupabaseBrowser()
   }
 

@@ -119,7 +119,7 @@ export function ServiceBrowser({ showAll = false, maxItems = 8 }: ServiceBrowser
     return (
       <div className="text-center py-8">
         <p className="text-red-600 mb-4">Failed to load services: {error}</p>
-        <Button onClick={() => window.location.reload()}>
+        <Button onClick={() => typeof window !== 'undefined' && window.location.reload()}>
           Try Again
         </Button>
       </div>

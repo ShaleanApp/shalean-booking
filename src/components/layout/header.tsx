@@ -34,7 +34,9 @@ export function Header() {
     const { createSupabaseBrowser } = await import('@/lib/supabase/browser')
     const supabase = createSupabaseBrowser()
     await supabase.auth.signOut()
-    window.location.href = '/'
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
   }
 
   const getRoleColor = (role: string) => {

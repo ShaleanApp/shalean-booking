@@ -39,10 +39,7 @@ export function ServiceSelectionStep() {
     setError(null)
 
     try {
-      // Check if environment variables are set
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        throw new Error('Supabase environment variables are not configured. Please check your .env.local file.')
-      }
+      // Environment variables are validated at import time in env.client.ts
 
       const supabase = createSupabaseBrowser()
       

@@ -19,9 +19,6 @@ import { useCategories } from './categories/_hooks/use-categories'
 import { useItems } from './items/_hooks/use-items'
 import { useExtras } from './extras/_hooks/use-extras'
 
-// Export runtime and dynamic for Next.js
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
 
 export default function ServiceManagementPage() {
   const { profile, loading } = useProfile()
@@ -52,9 +49,9 @@ export default function ServiceManagementPage() {
     )
   }
 
-  const activeCategories = categories?.filter(c => c.is_active).length || 0
-  const activeItems = items?.filter(i => i.is_active).length || 0
-  const activeExtras = extras?.filter(e => e.is_active).length || 0
+  const activeCategories = Array.isArray(categories) ? categories.filter(c => c.is_active).length : 0
+  const activeItems = Array.isArray(items) ? items.filter(i => i.is_active).length : 0
+  const activeExtras = Array.isArray(extras) ? extras.filter(e => e.is_active).length : 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,7 +80,7 @@ export default function ServiceManagementPage() {
               <Tag className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{categories?.length || 0}</div>
+              <div className="text-2xl font-bold">{Array.isArray(categories) ? categories.length : 0}</div>
               <p className="text-xs text-muted-foreground">
                 {activeCategories} active
               </p>
@@ -96,7 +93,7 @@ export default function ServiceManagementPage() {
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{items?.length || 0}</div>
+              <div className="text-2xl font-bold">{Array.isArray(items) ? items.length : 0}</div>
               <p className="text-xs text-muted-foreground">
                 {activeItems} active
               </p>
@@ -109,7 +106,7 @@ export default function ServiceManagementPage() {
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{extras?.length || 0}</div>
+              <div className="text-2xl font-bold">{Array.isArray(extras) ? extras.length : 0}</div>
               <p className="text-xs text-muted-foreground">
                 {activeExtras} active
               </p>
@@ -128,7 +125,7 @@ export default function ServiceManagementPage() {
                   Categories
                 </CardTitle>
                 <Badge variant="outline">
-                  {categories?.length || 0} total
+                  {Array.isArray(categories) ? categories.length : 0} total
                 </Badge>
               </div>
             </CardHeader>
@@ -162,7 +159,7 @@ export default function ServiceManagementPage() {
                   Service Items
                 </CardTitle>
                 <Badge variant="outline">
-                  {items?.length || 0} total
+                  {Array.isArray(items) ? items.length : 0} total
                 </Badge>
               </div>
             </CardHeader>
@@ -196,7 +193,7 @@ export default function ServiceManagementPage() {
                   Service Extras
                 </CardTitle>
                 <Badge variant="outline">
-                  {extras?.length || 0} total
+                  {Array.isArray(extras) ? extras.length : 0} total
                 </Badge>
               </div>
             </CardHeader>
