@@ -69,11 +69,12 @@ const nextConfig: NextConfig = {
       '@/lib/push-notifications': isServer ? false : '@/lib/push-notifications',
     };
 
-    // Configure web-push for server-side usage
+    // Configure web-push and paystack for server-side usage
     if (isServer) {
       config.externals = config.externals || [];
       config.externals.push({
         'web-push': 'commonjs web-push',
+        '@paystack/inline-js': 'commonjs @paystack/inline-js',
       });
     }
 
